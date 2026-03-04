@@ -2,11 +2,49 @@
 
 MCP server for bootstrapping Linear projects from natural language descriptions. Generates structured plans, validates them, and creates complete project hierarchies in Linear with milestones, epics, issues, labels, and dependency relations.
 
+## Workflow
+
+The recommended sequence for bootstrapping a project:
+
+```
+list-teams → introspect-workspace → generate-plan → validate-plan → bootstrap-project
+```
+
+Or use the compound tool for a single call:
+
+```
+generate-and-bootstrap
+```
+
+Both paths auto-introspect the workspace when `LINEAR_API_KEY` is available, reusing cached context for 30 minutes.
+
 ## Tools
+
+### list-teams
+
+List all Linear teams accessible to the configured API key. Use this to discover `team_id` values for other tools.
+
+**Input:** none
+
+**Returns:** `[{ id, name, key }]` — array of accessible teams
+
+### introspect-workspace
+
+Read team conventions from Linear: workflow states, labels, cycles, existing projects. Returns cached context (30-min TTL). Called automatically by `generate-plan`, or use standalone to inspect team setup.
+
+**Input:**
+
+| Field | Type | Required | Description |
+|-------|------|----------|-------------|
+| `team_id` | string | yes | Linear team ID |
+
+**Returns:** `WorkspaceContext` — team name, workflow states, default state, labels (with parent groups), custom fields, cycle info, existing projects
 
 ### generate-plan
 
 Generate a structured project plan from a description. Returns a `plan_id` (cached server-side for 30 minutes) and summary statistics. The full plan is not returned to keep context lean — use `plan_id` with other tools.
+
+Auto-introspects the workspace when `LINEAR_API_KEY` is available, so generated plans respect existing labels, workflow states, and team conventions.
 
 **Input:**
 
@@ -15,12 +53,22 @@ Generate a structured project plan from a description. Returns a `plan_id` (cach
 | `description` | string | yes | Natural language project description |
 | `team_id` | string | yes | Linear team ID |
 | `complexity` | `"small" \| "medium" \| "large"` | no | Scale hint (default: `"medium"`) |
+| `project_type` | `"feature" \| "infrastructure" \| "api" \| "migration"` | no | Archetype (default: `"feature"`) |
 | `preferences.milestone_style` | `"time-based" \| "deliverable-based" \| "hybrid"` | no | Milestone naming style |
 | `preferences.issue_detail_level` | `"titles-only" \| "with-descriptions" \| "full-acceptance-criteria"` | no | Issue detail level |
 | `preferences.include_infrastructure` | boolean | no | Include infra/DevOps epic |
 | `preferences.include_docs` | boolean | no | Include documentation epic |
 
 **Returns:** `{ plan_id, summary }` — plan reference + statistics (total issues, epics, milestones, estimated points)
+
+**Project Archetypes:**
+
+| Type | Example Milestones | Example Epics |
+|------|-------------------|---------------|
+| `feature` | Spec & design, MVP behind feature flag, Public launch | Backend APIs, Web UI, Analytics |
+| `infrastructure` | Prototype, Dogfood for one service, Org-wide rollout | Core infra changes, Service migrations, Monitoring |
+| `api` | API design sign-off, Backend implementation, General availability | Auth & rate limiting, Core endpoints, SDKs & DX |
+| `migration` | Dual-write in place, Backfill completed, Cutover | Data modeling, Backfill jobs, Cutover runbook |
 
 ### validate-plan
 
@@ -99,6 +147,7 @@ Compound tool that generates a plan, validates it, and bootstraps it in Linear i
 | `description` | string | yes | Natural language project description |
 | `team_id` | string | yes | Linear team ID |
 | `complexity` | `"small" \| "medium" \| "large"` | no | Scale hint (default: `"medium"`) |
+| `project_type` | `"feature" \| "infrastructure" \| "api" \| "migration"` | no | Archetype (default: `"feature"`) |
 | `preferences` | object | no | Same as generate-plan |
 | `dry_run` | boolean | no | Generate + validate only (default: `false`) |
 
@@ -172,6 +221,18 @@ LLM_API_KEY=... LINEAR_API_KEY=... pnpm start
 # Run tests
 pnpm test
 ```
+
+## Context-Aware Behavior
+
+When `LINEAR_API_KEY` is available, `generate-plan` and `generate-and-bootstrap` automatically introspect the target team's workspace before generating a plan. This means:
+
+- **Label reuse** — existing team labels are reused by exact name match; new labels are only created when no match exists
+- **Workflow awareness** — triage states are respected (issues never bypass triage); the team's default state is applied to all created issues
+- **Project collision avoidance** — the LLM is told about active projects to avoid naming conflicts
+- **Cycle fit** — when cycles are enabled, the LLM is guided to keep issues sized for one cycle
+- **Custom fields** — required custom fields are noted in the prompt (schema-ready; SDK v37 does not expose custom fields yet, so this array is always empty for now)
+
+Workspace context is cached for 30 minutes per team. Call `introspect-workspace` directly to inspect or refresh.
 
 ## Context Efficiency
 

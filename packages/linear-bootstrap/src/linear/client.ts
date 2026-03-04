@@ -166,6 +166,7 @@ export class LinearApiClient {
     projectMilestoneId?: string;
     labelIds?: string[];
     parentId?: string;
+    stateId?: string;
   }): Promise<Issue> {
     const { result: payload } = await withTiming("linear-create-issue", () =>
       withRetry(
@@ -265,6 +266,176 @@ export class LinearApiClient {
       { issueId, blockedByIssueId },
       `Set dependency: ${blockedByIssueId} blocks ${issueId}`,
     );
+  }
+
+  async getTeamWorkflowStates(
+    teamId: string,
+  ): Promise<{ id: string; name: string; type: string }[]> {
+    const { result: states } = await withTiming(
+      "linear-get-team-states",
+      () =>
+        withRetry(
+          "getTeamWorkflowStates",
+          async () => {
+            const team = await this.client.team(teamId);
+            const connection = await team.states({ first: 100 });
+            return connection.nodes.map((s) => ({
+              id: s.id,
+              name: s.name,
+              type: s.type,
+            }));
+          },
+          this.logger,
+        ),
+    );
+    return states;
+  }
+
+  async getTeamLabels(
+    teamId: string,
+  ): Promise<{ id: string; name: string; parent_name?: string }[]> {
+    const { result: labels } = await withTiming(
+      "linear-get-team-labels",
+      () =>
+        withRetry(
+          "getTeamLabels",
+          async () => {
+            const team = await this.client.team(teamId);
+            const connection = await team.labels({ first: 100 });
+            const results: {
+              id: string;
+              name: string;
+              parent_name?: string;
+            }[] = [];
+            for (const label of connection.nodes) {
+              const parent = await label.parent;
+              results.push({
+                id: label.id,
+                name: label.name,
+                ...(parent ? { parent_name: parent.name } : {}),
+              });
+            }
+            return results;
+          },
+          this.logger,
+        ),
+    );
+    return labels;
+  }
+
+  async getTeamDefaultState(
+    teamId: string,
+  ): Promise<{ id: string; name: string } | undefined> {
+    const { result: state } = await withTiming(
+      "linear-get-default-state",
+      () =>
+        withRetry(
+          "getTeamDefaultState",
+          async () => {
+            const team = await this.client.team(teamId);
+            const defaultState = await team.defaultIssueState;
+            if (!defaultState) return undefined;
+            return { id: defaultState.id, name: defaultState.name };
+          },
+          this.logger,
+        ),
+    );
+    return state;
+  }
+
+  async getTeamActiveCycle(
+    teamId: string,
+  ): Promise<
+    | { id: string; name: string; starts_at: string; ends_at: string }
+    | undefined
+  > {
+    const { result: cycle } = await withTiming(
+      "linear-get-active-cycle",
+      () =>
+        withRetry(
+          "getTeamActiveCycle",
+          async () => {
+            const team = await this.client.team(teamId);
+            if (!team.cyclesEnabled) return undefined;
+            const activeCycle = await team.activeCycle;
+            if (!activeCycle) return undefined;
+            return {
+              id: activeCycle.id,
+              name:
+                activeCycle.name ?? `Cycle ${activeCycle.number}`,
+              starts_at: activeCycle.startsAt.toISOString(),
+              ends_at: activeCycle.endsAt.toISOString(),
+            };
+          },
+          this.logger,
+        ),
+    );
+    return cycle;
+  }
+
+  async getTeamInfo(
+    teamId: string,
+  ): Promise<{ name: string; cyclesEnabled: boolean; triageEnabled: boolean }> {
+    const { result: info } = await withTiming("linear-get-team-info", () =>
+      withRetry(
+        "getTeamInfo",
+        async () => {
+          const team = await this.client.team(teamId);
+          return {
+            name: team.name,
+            cyclesEnabled: team.cyclesEnabled,
+            triageEnabled: team.triageEnabled,
+          };
+        },
+        this.logger,
+      ),
+    );
+    return info;
+  }
+
+  async getTeamProjects(
+    teamId: string,
+  ): Promise<{ id: string; name: string; state: string }[]> {
+    const { result: projects } = await withTiming(
+      "linear-get-team-projects",
+      () =>
+        withRetry(
+          "getTeamProjects",
+          async () => {
+            const connection = await this.client.projects({
+              filter: {
+                accessibleTeams: { id: { eq: teamId } },
+              },
+              first: 100,
+            });
+            return connection.nodes.map((p) => ({
+              id: p.id,
+              name: p.name,
+              state: p.state,
+            }));
+          },
+          this.logger,
+        ),
+    );
+    return projects;
+  }
+
+  async listTeams(): Promise<{ id: string; name: string; key: string }[]> {
+    const { result: teams } = await withTiming("linear-list-teams", () =>
+      withRetry(
+        "listTeams",
+        async () => {
+          const connection = await this.client.teams({ first: 100 });
+          return connection.nodes.map((t) => ({
+            id: t.id,
+            name: t.name,
+            key: t.key,
+          }));
+        },
+        this.logger,
+      ),
+    );
+    return teams;
   }
 
   async getProjectByName(name: string): Promise<Project | null> {

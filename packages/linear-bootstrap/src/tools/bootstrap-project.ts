@@ -7,12 +7,25 @@ import {
 import { LinearApiClient } from "../linear/client.js";
 import { validatePlan } from "./validate-plan.js";
 import { resolvePlan } from "../plan-cache.js";
+import { retrieveWorkspaceContext } from "../workspace-cache.js";
 import type {
   BootstrapProjectInput,
   BootstrapResult,
   PlanValidationResult,
   Plan,
+  WorkspaceContext,
 } from "../types.js";
+
+export function buildExistingLabelMap(
+  context: WorkspaceContext | undefined,
+): Map<string, string> {
+  const map = new Map<string, string>();
+  if (!context) return map;
+  for (const label of context.labels) {
+    map.set(label.name.toLowerCase(), label.id);
+  }
+  return map;
+}
 
 function collectUniqueLabels(plan: Plan): string[] {
   const labels = new Set<string>();
@@ -101,9 +114,25 @@ export async function bootstrapProject(
       }
     }
 
-    // Create labels (non-critical — log warning on failure)
+    // Fetch workspace context for label reuse and default state
+    const workspaceContext = retrieveWorkspaceContext(team_id);
+    const existingLabelMap = buildExistingLabelMap(workspaceContext);
+    const defaultStateId = workspaceContext?.default_state_id;
+
+    // Create labels (non-critical — reuse existing, create new)
     const uniqueLabels = collectUniqueLabels(plan);
     for (const labelName of uniqueLabels) {
+      const existingId = existingLabelMap.get(labelName.toLowerCase());
+      if (existingId) {
+        labelIds[labelName] = existingId;
+        logger.info(
+          { labelName, labelId: existingId },
+          `Reusing existing label "${labelName}"`,
+        );
+        completed.push(`label:${existingId}(reused)`);
+        continue;
+      }
+
       try {
         const label = await client.createLabel({
           name: labelName,
@@ -131,6 +160,7 @@ export async function bootstrapProject(
           description: epic.description,
           projectId: project.id,
           projectMilestoneId: milestoneId,
+          ...(defaultStateId ? { stateId: defaultStateId } : {}),
         });
         epicIds[epic.title] = epicIssue.id;
         issueIds[epic.title] = epicIssue.id;
@@ -153,6 +183,7 @@ export async function bootstrapProject(
               labelIds:
                 issueLabelIds.length > 0 ? issueLabelIds : undefined,
               parentId: epicIssue.id,
+              ...(defaultStateId ? { stateId: defaultStateId } : {}),
             });
             issueIds[issue.title] = childIssue.id;
             completed.push(`issue:${childIssue.id}`);
@@ -196,6 +227,19 @@ export async function bootstrapProject(
             }
           }
         }
+      }
+    }
+
+    // Warn about required custom fields
+    if (workspaceContext) {
+      const requiredFields = workspaceContext.custom_fields.filter(
+        (f) => f.required,
+      );
+      if (requiredFields.length > 0) {
+        logger.warn(
+          { fields: requiredFields.map((f) => f.name) },
+          "Team has required custom fields not populated by bootstrap",
+        );
       }
     }
 

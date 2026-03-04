@@ -12,76 +12,14 @@ import {
   type GeneratePlanInput,
   type Plan,
   type PlanSummary,
+  type WorkspaceContext,
 } from "../types.js";
 import { storePlan } from "../plan-cache.js";
+import { retrieveWorkspaceContext } from "../workspace-cache.js";
+import { introspectWorkspaceCore } from "./introspect-workspace.js";
+import { buildSystemPrompt } from "../planning/prompts.js";
 
 const DEFAULT_MODEL = "anthropic/claude-sonnet-4";
-
-function buildSystemPrompt(args: GeneratePlanInput): string {
-  const { complexity, preferences } = args;
-
-  const scaleGuide = {
-    small: "1-2 milestones, 3-5 epics, 10-25 issues",
-    medium: "2-4 milestones, 5-10 epics, 20-60 issues",
-    large: "4-6 milestones, 10-20 epics, 50-120 issues",
-  }[complexity];
-
-  const detailLevel = preferences?.issue_detail_level ?? "with-descriptions";
-
-  let prompt = `You are a project planning expert. Generate a structured project plan as JSON.
-
-## Scale
-Target: ${scaleGuide}
-
-## Structure Rules
-- Milestones represent major phases or delivery targets. Each has a unique name, description, and sort_order (starting at 0).
-- Epics are coherent deliverables, NOT categories. Each epic references a milestone by name and contains 3-10 issues.
-- Issues use imperative titles (e.g. "Add authentication middleware", NOT "Authentication").
-- Priority: 1=urgent, 2=high, 3=medium, 4=low. Most issues should be 2-3.
-- Labels: use short lowercase kebab-case (e.g. "backend", "frontend", "api", "database", "testing").
-- depends_on: only list real blockers, referencing other issue titles exactly. Most issues have no dependencies.
-- Estimates are in story points (1, 2, 3, 5, 8). Omit if unsure.`;
-
-  if (detailLevel === "full-acceptance-criteria") {
-    prompt += `\n- Every issue MUST have a description with acceptance criteria as a markdown checklist.`;
-  } else if (detailLevel === "with-descriptions") {
-    prompt += `\n- Issues should have brief descriptions explaining what needs to be done.`;
-  } else {
-    prompt += `\n- Issue descriptions are optional. Focus on clear, self-explanatory titles.`;
-  }
-
-  if (preferences?.milestone_style === "time-based") {
-    prompt += `\n- Milestones should represent time-based phases (e.g. "Week 1-2", "Sprint 1").`;
-  } else if (preferences?.milestone_style === "deliverable-based") {
-    prompt += `\n- Milestones should represent deliverable-based goals (e.g. "MVP", "Beta Launch").`;
-  }
-
-  if (preferences?.include_infrastructure) {
-    prompt += `\n- Include an infrastructure/DevOps epic covering CI/CD, deployment, monitoring, etc.`;
-  }
-
-  if (preferences?.include_docs) {
-    prompt += `\n- Include a documentation epic covering API docs, user guides, README, etc.`;
-  }
-
-  prompt += `
-
-## Output Format
-Return ONLY valid JSON matching this schema — no markdown fences, no explanation, no extra text:
-{
-  "project": { "name": string, "description": string, "target_date"?: string },
-  "milestones": [{ "name": string, "description": string, "target_date"?: string, "sort_order": number }],
-  "epics": [{
-    "title": string, "description": string, "milestone": string,
-    "issues": [{
-      "title": string, "description"?: string, "estimate"?: number,
-      "labels": string[], "priority": number (1-4), "depends_on": string[]
-    }]
-  }]
-}`;
-
-  return prompt;
-}
 
 function computeSummary(plan: Plan): PlanSummary {
   let totalIssues = 0;
@@ -117,15 +55,38 @@ export async function generatePlanCore(
 
   const model = process.env.LLM_MODEL ?? DEFAULT_MODEL;
 
+  // Auto-introspect workspace (non-blocking on failure)
+  let workspaceContext: WorkspaceContext | undefined;
+  try {
+    workspaceContext = retrieveWorkspaceContext(args.team_id);
+    if (!workspaceContext && process.env.LINEAR_API_KEY) {
+      const { context } = await introspectWorkspaceCore(
+        { team_id: args.team_id },
+        logger,
+      );
+      workspaceContext = context;
+    }
+  } catch (err) {
+    logger.warn(
+      { team_id: args.team_id, err },
+      "Workspace introspection failed, proceeding without context",
+    );
+  }
+
   const client = new OpenAI({
     apiKey,
     baseURL: "https://openrouter.ai/api/v1",
   });
 
-  const systemPrompt = buildSystemPrompt(args);
+  const systemPrompt = buildSystemPrompt(args, workspaceContext);
 
   logger.info(
-    { complexity: args.complexity, model },
+    {
+      complexity: args.complexity,
+      project_type: args.project_type,
+      model,
+      hasWorkspaceContext: !!workspaceContext,
+    },
     "Generating project plan via OpenRouter",
   );
 

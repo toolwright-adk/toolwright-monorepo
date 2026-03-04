@@ -40,10 +40,18 @@ export const PlanSummarySchema = z.object({
   estimated_points: z.number(),
 });
 
+export const ProjectTypeEnum = z.enum([
+  "feature",
+  "infrastructure",
+  "api",
+  "migration",
+]);
+
 export const GeneratePlanInputSchema = z.object({
   description: z.string(),
   team_id: z.string(),
   complexity: z.enum(["small", "medium", "large"]).default("medium"),
+  project_type: ProjectTypeEnum.default("feature"),
   preferences: z
     .object({
       milestone_style: z
@@ -113,6 +121,63 @@ export const AddEpicResultSchema = z.object({
   issue_ids: z.record(z.string(), z.string()),
 });
 
+// --- Workspace introspection schemas ---
+
+export const WorkflowStateInfoSchema = z.object({
+  id: z.string(),
+  name: z.string(),
+  type: z.string(),
+});
+
+export const LabelInfoSchema = z.object({
+  id: z.string(),
+  name: z.string(),
+  parent_name: z.string().optional(),
+});
+
+export const CustomFieldInfoSchema = z.object({
+  id: z.string(),
+  name: z.string(),
+  required: z.boolean(),
+});
+
+export const ActiveCycleSchema = z.object({
+  id: z.string(),
+  name: z.string(),
+  starts_at: z.string(),
+  ends_at: z.string(),
+});
+
+export const WorkspaceContextSchema = z.object({
+  team_name: z.string(),
+  workflow_states: z.array(WorkflowStateInfoSchema),
+  default_state_id: z.string().optional(),
+  default_state_name: z.string().optional(),
+  labels: z.array(LabelInfoSchema),
+  custom_fields: z.array(CustomFieldInfoSchema),
+  cycles_enabled: z.boolean(),
+  active_cycle: ActiveCycleSchema.optional(),
+  existing_projects: z.array(
+    z.object({
+      id: z.string(),
+      name: z.string(),
+      state: z.string(),
+    }),
+  ),
+});
+
+export const IntrospectWorkspaceInputSchema = z.object({
+  team_id: z.string(),
+});
+
+export const ListTeamsInputSchema = z.object({});
+
+export const TeamInfoSchema = z.object({
+  id: z.string(),
+  name: z.string(),
+  key: z.string(),
+});
+
 // --- Inferred types ---
 
 export type Issue = z.infer<typeof IssueSchema>;
@@ -131,3 +196,14 @@ export type GenerateAndBootstrapInput = z.infer<
 export type BootstrapResult = z.infer<typeof BootstrapResultSchema>;
 export type AddEpicInput = z.infer<typeof AddEpicInputSchema>;
 export type AddEpicResult = z.infer<typeof AddEpicResultSchema>;
+export type ProjectType = z.infer<typeof ProjectTypeEnum>;
+export type WorkflowStateInfo = z.infer<typeof WorkflowStateInfoSchema>;
+export type LabelInfo = z.infer<typeof LabelInfoSchema>;
+export type CustomFieldInfo = z.infer<typeof CustomFieldInfoSchema>;
+export type ActiveCycle = z.infer<typeof ActiveCycleSchema>;
+export type WorkspaceContext = z.infer<typeof WorkspaceContextSchema>;
+export type IntrospectWorkspaceInput = z.infer<
+  typeof IntrospectWorkspaceInputSchema
+>;
+export type ListTeamsInput = z.infer<typeof ListTeamsInputSchema>;
+export type TeamInfo = z.infer<typeof TeamInfoSchema>;

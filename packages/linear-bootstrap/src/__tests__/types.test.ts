@@ -2,6 +2,9 @@ import { describe, it, expect } from "vitest";
 import {
   PlanSchema,
   BootstrapProjectInputSchema,
+  GeneratePlanInputSchema,
+  IntrospectWorkspaceInputSchema,
+  WorkspaceContextSchema,
 } from "../types.js";
 
 const validPlan = {
@@ -109,6 +112,92 @@ describe("BootstrapProjectInputSchema", () => {
   it("rejects missing team_id", () => {
     const result = BootstrapProjectInputSchema.safeParse({
       plan: validPlan,
+    });
+    expect(result.success).toBe(false);
+  });
+});
+
+describe("GeneratePlanInputSchema", () => {
+  it("defaults project_type to feature", () => {
+    const result = GeneratePlanInputSchema.safeParse({
+      description: "Test",
+      team_id: "team-1",
+    });
+    expect(result.success).toBe(true);
+    if (result.success) {
+      expect(result.data.project_type).toBe("feature");
+    }
+  });
+
+  it("accepts all four project types", () => {
+    for (const pt of ["feature", "infrastructure", "api", "migration"]) {
+      const result = GeneratePlanInputSchema.safeParse({
+        description: "Test",
+        team_id: "team-1",
+        project_type: pt,
+      });
+      expect(result.success, `${pt}`).toBe(true);
+    }
+  });
+
+  it("rejects invalid project_type", () => {
+    const result = GeneratePlanInputSchema.safeParse({
+      description: "Test",
+      team_id: "team-1",
+      project_type: "unknown",
+    });
+    expect(result.success).toBe(false);
+  });
+});
+
+describe("IntrospectWorkspaceInputSchema", () => {
+  it("accepts valid team_id", () => {
+    const result = IntrospectWorkspaceInputSchema.safeParse({
+      team_id: "team-1",
+    });
+    expect(result.success).toBe(true);
+  });
+
+  it("rejects missing team_id", () => {
+    const result = IntrospectWorkspaceInputSchema.safeParse({});
+    expect(result.success).toBe(false);
+  });
+});
+
+describe("WorkspaceContextSchema", () => {
+  it("accepts a valid workspace context", () => {
+    const result = WorkspaceContextSchema.safeParse({
+      team_name: "Engineering",
+      workflow_states: [{ id: "s1", name: "Backlog", type: "backlog" }],
+      default_state_id: "s1",
+      default_state_name: "Backlog",
+      labels: [{ id: "l1", name: "backend" }],
+      custom_fields: [],
+      cycles_enabled: false,
+      existing_projects: [],
+    });
+    expect(result.success).toBe(true);
+  });
+
+  it("accepts context with optional fields omitted", () => {
+    const result = WorkspaceContextSchema.safeParse({
+      team_name: "Design",
+      workflow_states: [],
+      labels: [],
+      custom_fields: [],
+      cycles_enabled: true,
+      existing_projects: [],
+    });
+    expect(result.success).toBe(true);
+    if (result.success) {
+      expect(result.data.default_state_id).toBeUndefined();
+      expect(result.data.active_cycle).toBeUndefined();
+    }
+  });
+
+  it("rejects missing required fields", () => {
+    const result = WorkspaceContextSchema.safeParse({
+      team_name: "Engineering",
     });
     expect(result.success).toBe(false);
   });

@@ -15,12 +15,16 @@ import {
   BootstrapProjectInputSchema,
   AddEpicInputSchema,
   GenerateAndBootstrapInputSchema,
+  IntrospectWorkspaceInputSchema,
+  ListTeamsInputSchema,
 } from "./types.js";
 import { generatePlan } from "./tools/generate-plan.js";
 import { validatePlanTool } from "./tools/validate-plan.js";
 import { bootstrapProject } from "./tools/bootstrap-project.js";
 import { addEpic } from "./tools/add-epic.js";
 import { generateAndBootstrap } from "./tools/generate-and-bootstrap.js";
+import { introspectWorkspace } from "./tools/introspect-workspace.js";
+import { listTeams } from "./tools/list-teams.js";
 
 const logger = createLogger("linear-bootstrap");
 
@@ -137,6 +141,35 @@ server.tool(
 );
 
 server.tool(
+  "introspect-workspace",
+  "Read team conventions from Linear: workflow states, labels, cycles, existing projects. Returns cached context (30-min TTL). Called automatically by generate-plan, or use standalone to inspect team setup.",
+  IntrospectWorkspaceInputSchema.shape,
+  async (args): Promise<CallToolResult> => {
+    const ctx = {
+      requestId: generateRequestId(),
+      serverName: "linear-bootstrap",
+      toolName: "introspect-workspace",
+      startedAt: Date.now(),
+    };
+
+    try {
+      const { result } = await runWithContext(ctx, () =>
+        withTiming(
+          "introspect-workspace",
+          () => introspectWorkspace(args, logger),
+        ),
+      );
+      return { ...result };
+    } catch (err) {
+      if (err instanceof ToolwrightError) {
+        return { ...toolError(err) };
+      }
+      throw err;
+    }
+  },
+);
+
+server.tool(
   "generate-and-bootstrap",
   "Generate a project plan and immediately bootstrap it in Linear. Combines generate-plan + validate-plan + bootstrap-project into a single call. Set dry_run=true to generate and validate without creating anything.",
   GenerateAndBootstrapInputSchema.shape,
@@ -154,6 +187,32 @@ server.tool(
           "generate-and-bootstrap",
           () => generateAndBootstrap(args, logger),
         ),
+      );
+      return { ...result };
+    } catch (err) {
+      if (err instanceof ToolwrightError) {
+        return { ...toolError(err) };
+      }
+      throw err;
+    }
+  },
+);
+
+server.tool(
+  "list-teams",
+  "List all Linear teams accessible to the configured API key. Returns team id, name, and key. Use this to discover team_id values for other tools.",
+  ListTeamsInputSchema.shape,
+  async (args): Promise<CallToolResult> => {
+    const ctx = {
+      requestId: generateRequestId(),
+      serverName: "linear-bootstrap",
+      toolName: "list-teams",
+      startedAt: Date.now(),
+    };
+
+    try {
+      const { result } = await runWithContext(ctx, () =>
+        withTiming("list-teams", () => listTeams(args, logger)),
       );
       return { ...result };
     } catch (err) {
