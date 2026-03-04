@@ -1,0 +1,8 @@
+{
+  "title": "{{Actor Title}} Input",
+  "description": "Input schema for {{actor-name}}",
+  "type": "object",
+  "schemaVersion": 1,
+  "properties": {},
+  "required": []
+}

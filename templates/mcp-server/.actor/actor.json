@@ -1,0 +1,18 @@
+{
+  "actorSpecification": 1,
+  "name": "{{actor-name}}",
+  "title": "{{Actor Title}}",
+  "description": "{{Brief description of what this MCP server does}}",
+  "version": "0.1.0",
+  "buildTag": "latest",
+  "env": null,
+  "dockerfile": "./Dockerfile",
+  "input": "./input_schema.json",
+  "storages": {
+    "dataset": {
+      "actorSpecification": 1,
+      "title": "Results",
+      "views": {}
+    }
+  }
+}
