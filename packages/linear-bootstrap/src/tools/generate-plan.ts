@@ -14,7 +14,7 @@ import {
   type PlanSummary,
 } from "../types.js";
 
-const DEFAULT_MODEL = "anthropic/claude-sonnet-4-20250514";
+const DEFAULT_MODEL = "anthropic/claude-sonnet-4";
 
 function buildSystemPrompt(args: GeneratePlanInput): string {
   const { complexity, preferences } = args;

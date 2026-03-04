@@ -92,7 +92,7 @@ Add a single epic with its child issues to an existing Linear project.
 |----------|-------------|-------------|
 | `LLM_API_KEY` | generate-plan | OpenRouter API key |
 | `LINEAR_API_KEY` | bootstrap-project, add-epic | Linear API key |
-| `LLM_MODEL` | generate-plan (optional) | Override LLM model (default: `anthropic/claude-sonnet-4-20250514`) |
+| `LLM_MODEL` | generate-plan (optional) | Override LLM model (default: `anthropic/claude-sonnet-4`) |
 
 ## Usage
 
