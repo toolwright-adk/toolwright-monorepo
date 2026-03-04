@@ -8,8 +8,8 @@ Deployed as an [Apify Actor](https://apify.com/actors).
 
 ## Tools
 
-| Tool | Description |
-|------|-------------|
+| Tool            | Description            |
+| --------------- | ---------------------- |
 | `{{tool-name}}` | {{What the tool does}} |
 
 ## Setup

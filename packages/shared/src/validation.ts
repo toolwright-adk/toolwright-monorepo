@@ -28,9 +28,7 @@ export function validateToolInput<T>(
   };
 }
 
-function formatZodErrors(
-  error: ZodError,
-): Record<string, string[]> {
+function formatZodErrors(error: ZodError): Record<string, string[]> {
   const fieldErrors: Record<string, string[]> = {};
 
   for (const issue of error.issues) {

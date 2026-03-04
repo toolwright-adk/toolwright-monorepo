@@ -18,10 +18,10 @@ toolwright-monorepo/
 
 ## Packages
 
-| Package | Description | Status |
-|---------|-------------|--------|
-| `@toolwright-adk/shared` | Shared validation, error handling, output formatting, and test utilities | Active |
-| `@toolwright-adk/linear-bootstrap` | Linear project bootstrapping MCP server | Planned |
+| Package                            | Description                                                              | Status  |
+| ---------------------------------- | ------------------------------------------------------------------------ | ------- |
+| `@toolwright-adk/shared`           | Shared validation, error handling, output formatting, and test utilities | Active  |
+| `@toolwright-adk/linear-bootstrap` | Linear project bootstrapping MCP server                                  | Planned |
 
 ## Getting Started
 

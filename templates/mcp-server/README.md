@@ -6,8 +6,8 @@
 
 ## Tools
 
-| Tool | Description |
-|------|-------------|
+| Tool            | Description            |
+| --------------- | ---------------------- |
 | `{{tool-name}}` | {{What the tool does}} |
 
 ## Setup

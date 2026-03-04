@@ -4,10 +4,14 @@
   "version": "0.0.0",
   "description": "Agent Development Kit for production MCP servers and companion Skills",
   "license": "MIT",
+  "type": "module",
   "scripts": {
     "build": "pnpm -r build",
     "test": "pnpm -r test",
-    "lint": "pnpm -r lint",
+    "lint": "eslint .",
+    "lint:types": "pnpm -r lint",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
     "clean": "pnpm -r clean"
   },
   "engines": {
@@ -18,5 +22,11 @@
     "onlyBuiltDependencies": [
       "esbuild"
     ]
+  },
+  "devDependencies": {
+    "eslint": "^10.0.2",
+    "prettier": "^3.8.1",
+    "typescript": "^5.9.3",
+    "typescript-eslint": "^8.56.1"
   }
 }

@@ -11,8 +11,6 @@
     "declarationMap": true,
     "sourceMap": true
   },
-  "references": [
-    { "path": "packages/shared" }
-  ],
+  "references": [{ "path": "packages/shared" }],
   "files": []
 }

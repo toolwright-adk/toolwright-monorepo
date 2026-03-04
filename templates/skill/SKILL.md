@@ -20,6 +20,7 @@ compatibility:
 ## Instructions
 
 {{Step-by-step instructions for the agent. Be specific about:
+
 - What context to gather before acting
 - How to decompose the task
 - What tools to call and in what order
