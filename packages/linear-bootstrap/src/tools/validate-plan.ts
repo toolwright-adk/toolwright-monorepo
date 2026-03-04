@@ -6,6 +6,7 @@ import type {
   PlanValidationResult,
   ValidatePlanInput,
 } from "../types.js";
+import { resolvePlan } from "../plan-cache.js";
 
 interface IssueWithPath {
   title: string;
@@ -230,6 +231,7 @@ export function validatePlan(
 export function validatePlanTool(
   args: ValidatePlanInput,
 ): ToolSuccess<PlanValidationResult> {
-  const result = validatePlan(args.plan, args.preferences);
+  const plan = resolvePlan(args);
+  const result = validatePlan(plan, args.preferences);
   return success(result);
 }

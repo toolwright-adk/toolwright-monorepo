@@ -14,11 +14,13 @@ import {
   ValidatePlanInputSchema,
   BootstrapProjectInputSchema,
   AddEpicInputSchema,
+  GenerateAndBootstrapInputSchema,
 } from "./types.js";
 import { generatePlan } from "./tools/generate-plan.js";
 import { validatePlanTool } from "./tools/validate-plan.js";
 import { bootstrapProject } from "./tools/bootstrap-project.js";
 import { addEpic } from "./tools/add-epic.js";
+import { generateAndBootstrap } from "./tools/generate-and-bootstrap.js";
 
 const logger = createLogger("linear-bootstrap");
 
@@ -29,7 +31,7 @@ const server = new McpServer({
 
 server.tool(
   "generate-plan",
-  "Generate a structured project plan from a description. Returns milestones, epics, and issues without creating anything in Linear.",
+  "Generate a structured project plan from a description. Returns a plan_id (cached server-side for 30 min) and summary statistics. Use plan_id with validate-plan or bootstrap-project.",
   GeneratePlanInputSchema.shape,
   async (args): Promise<CallToolResult> => {
     const ctx = {
@@ -55,7 +57,7 @@ server.tool(
 
 server.tool(
   "validate-plan",
-  "Validate a project plan for structural issues. Checks for circular dependencies, orphaned references, undefined milestones, and other problems. Returns errors and warnings without creating anything in Linear.",
+  "Validate a project plan for structural issues. Accepts plan_id (from generate-plan) or inline plan object. Checks for circular dependencies, orphaned references, undefined milestones, and other problems.",
   ValidatePlanInputSchema.shape,
   async (args): Promise<CallToolResult> => {
     const ctx = {
@@ -81,7 +83,7 @@ server.tool(
 
 server.tool(
   "bootstrap-project",
-  "Create a complete Linear project from a plan. Creates the project, milestones, labels, epics (as parent issues), child issues, and dependency relations. Set dry_run=true to validate without creating anything.",
+  "Create a complete Linear project from a plan. Accepts plan_id (from generate-plan) or inline plan object. Creates project, milestones, labels, epics, issues, and dependencies. Set dry_run=true to validate only.",
   BootstrapProjectInputSchema.shape,
   async (args): Promise<CallToolResult> => {
     const ctx = {
@@ -123,6 +125,35 @@ server.tool(
     try {
       const { result } = await runWithContext(ctx, () =>
         withTiming("add-epic", () => addEpic(args, logger)),
+      );
+      return { ...result };
+    } catch (err) {
+      if (err instanceof ToolwrightError) {
+        return { ...toolError(err) };
+      }
+      throw err;
+    }
+  },
+);
+
+server.tool(
+  "generate-and-bootstrap",
+  "Generate a project plan and immediately bootstrap it in Linear. Combines generate-plan + validate-plan + bootstrap-project into a single call. Set dry_run=true to generate and validate without creating anything.",
+  GenerateAndBootstrapInputSchema.shape,
+  async (args): Promise<CallToolResult> => {
+    const ctx = {
+      requestId: generateRequestId(),
+      serverName: "linear-bootstrap",
+      toolName: "generate-and-bootstrap",
+      startedAt: Date.now(),
+    };
+
+    try {
+      const { result } = await runWithContext(ctx, () =>
+        withTiming(
+          "generate-and-bootstrap",
+          () => generateAndBootstrap(args, logger),
+        ),
       );
       return { ...result };
     } catch (err) {

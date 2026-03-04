@@ -6,7 +6,7 @@ MCP server for bootstrapping Linear projects from natural language descriptions.
 
 ### generate-plan
 
-Generate a structured project plan from a description. Returns milestones, epics, and issues without creating anything in Linear.
+Generate a structured project plan from a description. Returns a `plan_id` (cached server-side for 30 minutes) and summary statistics. The full plan is not returned to keep context lean — use `plan_id` with other tools.
 
 **Input:**
 
@@ -20,7 +20,7 @@ Generate a structured project plan from a description. Returns milestones, epics
 | `preferences.include_infrastructure` | boolean | no | Include infra/DevOps epic |
 | `preferences.include_docs` | boolean | no | Include documentation epic |
 
-**Returns:** `{ plan, summary }` — full plan object + statistics (total issues, epics, milestones, estimated points)
+**Returns:** `{ plan_id, summary }` — plan reference + statistics (total issues, epics, milestones, estimated points)
 
 ### validate-plan
 
@@ -30,7 +30,8 @@ Validate a project plan for structural issues. Pure logic, no external calls.
 
 | Field | Type | Required | Description |
 |-------|------|----------|-------------|
-| `plan` | Plan | yes | Plan object to validate |
+| `plan_id` | string | one required | Plan ID from generate-plan |
+| `plan` | Plan | one required | Or inline plan object |
 | `preferences` | object | no | Same preferences as generate-plan |
 
 **Returns:** `{ valid, errors, warnings }` — boolean validity + arrays of `{ code, message, path? }`
@@ -57,7 +58,8 @@ Create a complete Linear project from a plan. Creates project, milestones, label
 
 | Field | Type | Required | Description |
 |-------|------|----------|-------------|
-| `plan` | Plan | yes | Validated plan object |
+| `plan_id` | string | one required | Plan ID from generate-plan |
+| `plan` | Plan | one required | Or inline plan object |
 | `team_id` | string | yes | Linear team ID |
 | `dry_run` | boolean | no | Validate only, don't create (default: `false`) |
 
@@ -86,13 +88,77 @@ Add a single epic with its child issues to an existing Linear project.
 
 **Returns:** `{ epic_id, issue_ids }` — created epic ID + map of issue titles to IDs
 
+### generate-and-bootstrap
+
+Compound tool that generates a plan, validates it, and bootstraps it in Linear in a single call. Eliminates the plan echo that wastes context when using generate-plan + bootstrap-project separately.
+
+**Input:**
+
+| Field | Type | Required | Description |
+|-------|------|----------|-------------|
+| `description` | string | yes | Natural language project description |
+| `team_id` | string | yes | Linear team ID |
+| `complexity` | `"small" \| "medium" \| "large"` | no | Scale hint (default: `"medium"`) |
+| `preferences` | object | no | Same as generate-plan |
+| `dry_run` | boolean | no | Generate + validate only (default: `false`) |
+
+**Returns:** `{ plan_id, summary, validation, bootstrap? }` — plan reference, stats, validation result, and bootstrap result (when not dry_run and validation passes)
+
 ## Required Environment Variables
 
 | Variable | Required By | Description |
 |----------|-------------|-------------|
-| `LLM_API_KEY` | generate-plan | OpenRouter API key |
-| `LINEAR_API_KEY` | bootstrap-project, add-epic | Linear API key |
+| `LLM_API_KEY` | generate-plan, generate-and-bootstrap | OpenRouter API key |
+| `LINEAR_API_KEY` | bootstrap-project, add-epic, generate-and-bootstrap | Linear API key |
 | `LLM_MODEL` | generate-plan (optional) | Override LLM model (default: `anthropic/claude-sonnet-4`) |
+
+## MCP Client Configuration
+
+### Claude Code
+
+Add to your project's `.mcp.json` or `~/.claude.json`:
+
+```json
+{
+  "mcpServers": {
+    "linear-bootstrap": {
+      "command": "node",
+      "args": ["/path/to/packages/linear-bootstrap/dist/server.js"],
+      "env": {
+        "LLM_API_KEY": "sk-or-...",
+        "LINEAR_API_KEY": "lin_api_..."
+      }
+    }
+  }
+}
+```
+
+### Cursor / Windsurf
+
+Add to your MCP settings (typically `.cursor/mcp.json`):
+
+```json
+{
+  "mcpServers": {
+    "linear-bootstrap": {
+      "command": "node",
+      "args": ["/path/to/packages/linear-bootstrap/dist/server.js"],
+      "env": {
+        "LLM_API_KEY": "sk-or-...",
+        "LINEAR_API_KEY": "lin_api_..."
+      }
+    }
+  }
+}
+```
+
+### Generic MCP Client (stdio)
+
+The server communicates over stdin/stdout using the MCP protocol:
+
+```bash
+LLM_API_KEY=sk-or-... LINEAR_API_KEY=lin_api_... node dist/server.js
+```
 
 ## Usage
 
@@ -106,3 +172,9 @@ LLM_API_KEY=... LINEAR_API_KEY=... pnpm start
 # Run tests
 pnpm test
 ```
+
+## Context Efficiency
+
+The server uses **server-side plan caching** to minimize context window pollution. When an agent calls `generate-plan`, the full plan is stored in memory and only a `plan_id` + summary is returned (~100 tokens vs ~3000+ for the full plan). Subsequent calls to `validate-plan` or `bootstrap-project` reference the plan by `plan_id`, avoiding the need to echo the entire plan object back through the agent's context.
+
+For the simplest workflow, use `generate-and-bootstrap` — a single tool call that handles everything internally, returning only the final result.

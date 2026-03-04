@@ -75,13 +75,19 @@ export const PlanValidationResultSchema = z.object({
 // --- Tool input schemas ---
 
 export const ValidatePlanInputSchema = z.object({
-  plan: PlanSchema,
+  plan: PlanSchema.optional(),
+  plan_id: z.string().optional(),
   preferences: GeneratePlanInputSchema.shape.preferences,
 });
 
 export const BootstrapProjectInputSchema = z.object({
-  plan: PlanSchema,
+  plan: PlanSchema.optional(),
+  plan_id: z.string().optional(),
   team_id: z.string(),
+  dry_run: z.boolean().default(false),
+});
+
+export const GenerateAndBootstrapInputSchema = GeneratePlanInputSchema.extend({
   dry_run: z.boolean().default(false),
 });
 
@@ -119,6 +125,9 @@ export type ValidationIssue = z.infer<typeof ValidationIssueSchema>;
 export type PlanValidationResult = z.infer<typeof PlanValidationResultSchema>;
 export type ValidatePlanInput = z.infer<typeof ValidatePlanInputSchema>;
 export type BootstrapProjectInput = z.infer<typeof BootstrapProjectInputSchema>;
+export type GenerateAndBootstrapInput = z.infer<
+  typeof GenerateAndBootstrapInputSchema
+>;
 export type BootstrapResult = z.infer<typeof BootstrapResultSchema>;
 export type AddEpicInput = z.infer<typeof AddEpicInputSchema>;
 export type AddEpicResult = z.infer<typeof AddEpicResultSchema>;

@@ -6,6 +6,7 @@ import {
 } from "@toolwright-adk/shared";
 import { LinearApiClient } from "../linear/client.js";
 import { validatePlan } from "./validate-plan.js";
+import { resolvePlan } from "../plan-cache.js";
 import type {
   BootstrapProjectInput,
   BootstrapResult,
@@ -29,7 +30,8 @@ export async function bootstrapProject(
   args: BootstrapProjectInput,
   logger: Logger,
 ): Promise<ToolSuccess<BootstrapResult | PlanValidationResult>> {
-  const { plan, team_id, dry_run } = args;
+  const plan = resolvePlan(args);
+  const { team_id, dry_run } = args;
 
   if (dry_run) {
     const validationResult = validatePlan(plan);

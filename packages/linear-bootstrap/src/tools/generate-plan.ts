@@ -13,6 +13,7 @@ import {
   type Plan,
   type PlanSummary,
 } from "../types.js";
+import { storePlan } from "../plan-cache.js";
 
 const DEFAULT_MODEL = "anthropic/claude-sonnet-4";
 
@@ -101,10 +102,11 @@ function computeSummary(plan: Plan): PlanSummary {
   };
 }
 
-export async function generatePlan(
+/** Core plan generation — returns raw plan + summary without caching */
+export async function generatePlanCore(
   args: GeneratePlanInput,
   logger: Logger,
-): Promise<ToolSuccess<{ plan: Plan; summary: PlanSummary }>> {
+): Promise<{ plan: Plan; summary: PlanSummary }> {
   const apiKey = process.env.LLM_API_KEY;
   if (!apiKey) {
     throw new ExternalServiceError(
@@ -193,5 +195,15 @@ export async function generatePlan(
     "Plan generated successfully",
   );
 
-  return success({ plan, summary });
+  return { plan, summary };
+}
+
+/** MCP wrapper — stores plan in cache, returns plan_id + summary */
+export async function generatePlan(
+  args: GeneratePlanInput,
+  logger: Logger,
+): Promise<ToolSuccess<{ plan_id: string; summary: PlanSummary }>> {
+  const { plan, summary } = await generatePlanCore(args, logger);
+  const planId = storePlan(plan);
+  return success({ plan_id: planId, summary });
 }
