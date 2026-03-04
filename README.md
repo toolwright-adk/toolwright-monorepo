@@ -9,7 +9,8 @@ toolwright-monorepo/
 ├── packages/           # Published packages
 │   └── shared/         # @toolwright-adk/shared — validation, errors, output, testing
 ├── templates/          # Scaffolding for new packages
-│   ├── mcp-server/     # Apify Actor + MCP server template
+│   ├── mcp-server/     # Platform-agnostic MCP server template
+│   ├── apify-actor/    # Apify Actor deployment template
 │   └── skill/          # Agent Skill template
 └── docs/               # Project documentation
     └── QUALITY-RUBRIC.md

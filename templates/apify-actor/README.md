@@ -1,8 +1,10 @@
-# {{Server Title}}
+# {{Actor Title}}
 
 ## Overview
 
 {{Brief description of what this MCP server does and what problem it solves.}}
+
+Deployed as an [Apify Actor](https://apify.com/actors).
 
 ## Tools
 
@@ -24,11 +26,18 @@
 
 ## Usage
 
+### As an Apify Actor
+
+Deploy to Apify and connect via the MCP integration.
+
+### Local development
+
 ```bash
 pnpm build
 pnpm start
 ```
 
-## Deployment
+## Pricing
 
-See `templates/apify-actor/` for Apify deployment, or adapt to your platform of choice.
+This Actor runs on the Apify platform. Costs depend on compute and memory usage.
+See [Apify pricing](https://apify.com/pricing) for details.
