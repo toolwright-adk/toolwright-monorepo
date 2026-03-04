@@ -9,8 +9,16 @@ import {
   error as toolError,
   ToolwrightError,
 } from "@toolwright-adk/shared";
-import { GeneratePlanInputSchema } from "./types.js";
+import {
+  GeneratePlanInputSchema,
+  ValidatePlanInputSchema,
+  BootstrapProjectInputSchema,
+  AddEpicInputSchema,
+} from "./types.js";
 import { generatePlan } from "./tools/generate-plan.js";
+import { validatePlanTool } from "./tools/validate-plan.js";
+import { bootstrapProject } from "./tools/bootstrap-project.js";
+import { addEpic } from "./tools/add-epic.js";
 
 const logger = createLogger("linear-bootstrap");
 
@@ -34,6 +42,87 @@ server.tool(
     try {
       const { result } = await runWithContext(ctx, () =>
         withTiming("generate-plan", () => generatePlan(args, logger)),
+      );
+      return { ...result };
+    } catch (err) {
+      if (err instanceof ToolwrightError) {
+        return { ...toolError(err) };
+      }
+      throw err;
+    }
+  },
+);
+
+server.tool(
+  "validate-plan",
+  "Validate a project plan for structural issues. Checks for circular dependencies, orphaned references, undefined milestones, and other problems. Returns errors and warnings without creating anything in Linear.",
+  ValidatePlanInputSchema.shape,
+  async (args): Promise<CallToolResult> => {
+    const ctx = {
+      requestId: generateRequestId(),
+      serverName: "linear-bootstrap",
+      toolName: "validate-plan",
+      startedAt: Date.now(),
+    };
+
+    try {
+      const { result } = await runWithContext(ctx, () =>
+        withTiming("validate-plan", () => validatePlanTool(args)),
+      );
+      return { ...result };
+    } catch (err) {
+      if (err instanceof ToolwrightError) {
+        return { ...toolError(err) };
+      }
+      throw err;
+    }
+  },
+);
+
+server.tool(
+  "bootstrap-project",
+  "Create a complete Linear project from a plan. Creates the project, milestones, labels, epics (as parent issues), child issues, and dependency relations. Set dry_run=true to validate without creating anything.",
+  BootstrapProjectInputSchema.shape,
+  async (args): Promise<CallToolResult> => {
+    const ctx = {
+      requestId: generateRequestId(),
+      serverName: "linear-bootstrap",
+      toolName: "bootstrap-project",
+      startedAt: Date.now(),
+    };
+
+    try {
+      const { result } = await runWithContext(ctx, () =>
+        withTiming(
+          "bootstrap-project",
+          () => bootstrapProject(args, logger),
+        ),
+      );
+      return { ...result };
+    } catch (err) {
+      if (err instanceof ToolwrightError) {
+        return { ...toolError(err) };
+      }
+      throw err;
+    }
+  },
+);
+
+server.tool(
+  "add-epic",
+  "Add a single epic with its child issues to an existing Linear project. Optionally wire to a milestone and apply label mappings.",
+  AddEpicInputSchema.shape,
+  async (args): Promise<CallToolResult> => {
+    const ctx = {
+      requestId: generateRequestId(),
+      serverName: "linear-bootstrap",
+      toolName: "add-epic",
+      startedAt: Date.now(),
+    };
+
+    try {
+      const { result } = await runWithContext(ctx, () =>
+        withTiming("add-epic", () => addEpic(args, logger)),
       );
       return { ...result };
     } catch (err) {

@@ -58,9 +58,67 @@ export const GeneratePlanInputSchema = z.object({
     .optional(),
 });
 
+// --- Validation result types ---
+
+export const ValidationIssueSchema = z.object({
+  code: z.string(),
+  message: z.string(),
+  path: z.string().optional(),
+});
+
+export const PlanValidationResultSchema = z.object({
+  valid: z.boolean(),
+  errors: z.array(ValidationIssueSchema),
+  warnings: z.array(ValidationIssueSchema),
+});
+
+// --- Tool input schemas ---
+
+export const ValidatePlanInputSchema = z.object({
+  plan: PlanSchema,
+  preferences: GeneratePlanInputSchema.shape.preferences,
+});
+
+export const BootstrapProjectInputSchema = z.object({
+  plan: PlanSchema,
+  team_id: z.string(),
+  dry_run: z.boolean().default(false),
+});
+
+export const BootstrapResultSchema = z.object({
+  project_id: z.string(),
+  milestone_ids: z.record(z.string(), z.string()),
+  label_ids: z.record(z.string(), z.string()),
+  epic_ids: z.record(z.string(), z.string()),
+  issue_ids: z.record(z.string(), z.string()),
+  dependency_count: z.number(),
+});
+
+export const AddEpicInputSchema = z.object({
+  project_id: z.string(),
+  team_id: z.string(),
+  epic: EpicSchema,
+  milestone_id: z.string().optional(),
+  label_ids: z.record(z.string(), z.string()).optional(),
+});
+
+export const AddEpicResultSchema = z.object({
+  epic_id: z.string(),
+  issue_ids: z.record(z.string(), z.string()),
+});
+
+// --- Inferred types ---
+
 export type Issue = z.infer<typeof IssueSchema>;
 export type Epic = z.infer<typeof EpicSchema>;
 export type Milestone = z.infer<typeof MilestoneSchema>;
 export type Plan = z.infer<typeof PlanSchema>;
 export type PlanSummary = z.infer<typeof PlanSummarySchema>;
 export type GeneratePlanInput = z.infer<typeof GeneratePlanInputSchema>;
+export type ValidationIssue = z.infer<typeof ValidationIssueSchema>;
+export type PlanValidationResult = z.infer<typeof PlanValidationResultSchema>;
+export type ValidatePlanInput = z.infer<typeof ValidatePlanInputSchema>;
+export type BootstrapProjectInput = z.infer<typeof BootstrapProjectInputSchema>;
+export type BootstrapResult = z.infer<typeof BootstrapResultSchema>;
+export type AddEpicInput = z.infer<typeof AddEpicInputSchema>;
+export type AddEpicResult = z.infer<typeof AddEpicResultSchema>;
