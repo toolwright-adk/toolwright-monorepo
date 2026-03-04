@@ -1,6 +1,6 @@
 # Toolwright ADK
 
-Agent Development Kit for production MCP servers and companion Skills. Orchestration-first tools for the Apify marketplace.
+Agent Development Kit for production MCP servers and companion Skills. Orchestration-first tools that ship with workflow knowledge, not just API connectivity.
 
 ## Monorepo Structure
 
