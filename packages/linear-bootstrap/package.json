@@ -1,0 +1,33 @@
+{
+  "name": "@toolwright-adk/linear-bootstrap",
+  "version": "0.1.0",
+  "description": "MCP server for bootstrapping Linear projects from natural language descriptions",
+  "license": "MIT",
+  "type": "module",
+  "main": "dist/server.js",
+  "types": "dist/server.d.ts",
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsup",
+    "start": "node dist/server.js",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "clean": "rm -rf dist",
+    "lint": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@linear/sdk": "^37.0.0",
+    "@modelcontextprotocol/sdk": "^1.12.1",
+    "@toolwright-adk/shared": "workspace:*",
+    "openai": "^4.104.0",
+    "zod": "^3.23.0"
+  },
+  "devDependencies": {
+    "@types/node": "^25.3.3",
+    "tsup": "^8.0.0",
+    "typescript": "^5.5.0",
+    "vitest": "^2.0.0"
+  }
+}
