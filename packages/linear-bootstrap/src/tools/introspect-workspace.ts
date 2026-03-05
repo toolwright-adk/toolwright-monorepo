@@ -2,15 +2,17 @@ import {
   type Logger,
   type ToolSuccess,
   success,
+  validateToolInput,
 } from "@toolwright-adk/shared";
 import { LinearApiClient } from "../linear/client.js";
 import {
   storeWorkspaceContext,
   retrieveWorkspaceContext,
 } from "../workspace-cache.js";
-import type {
-  IntrospectWorkspaceInput,
-  WorkspaceContext,
+import {
+  IntrospectWorkspaceInputSchema,
+  type IntrospectWorkspaceInput,
+  type WorkspaceContext,
 } from "../types.js";
 
 export async function introspectWorkspaceCore(
@@ -19,19 +21,13 @@ export async function introspectWorkspaceCore(
 ): Promise<{ context: WorkspaceContext }> {
   const cached = retrieveWorkspaceContext(args.team_id);
   if (cached) {
-    logger.info(
-      { team_id: args.team_id },
-      "Using cached workspace context",
-    );
+    logger.info({ team_id: args.team_id }, "Using cached workspace context");
     return { context: cached };
   }
 
   const client = new LinearApiClient(logger);
 
-  logger.info(
-    { team_id: args.team_id },
-    "Introspecting workspace from Linear",
-  );
+  logger.info({ team_id: args.team_id }, "Introspecting workspace from Linear");
 
   // Fetch team info first (need cyclesEnabled for conditional fetch)
   const teamInfo = await client.getTeamInfo(args.team_id);
@@ -81,6 +77,9 @@ export async function introspectWorkspace(
   args: IntrospectWorkspaceInput,
   logger: Logger,
 ): Promise<ToolSuccess<WorkspaceContext>> {
+  const validation = validateToolInput(IntrospectWorkspaceInputSchema, args);
+  if (!validation.success) throw validation.error;
+
   const { context } = await introspectWorkspaceCore(args, logger);
   return success(context);
 }

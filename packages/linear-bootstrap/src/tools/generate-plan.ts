@@ -6,9 +6,11 @@ import {
   ExternalServiceError,
   PlanValidationError,
   withTiming,
+  validateToolInput,
 } from "@toolwright-adk/shared";
 import {
   PlanSchema,
+  GeneratePlanInputSchema,
   type GeneratePlanInput,
   type Plan,
   type PlanSummary,
@@ -68,7 +70,10 @@ export async function generatePlanCore(
     }
   } catch (err) {
     logger.warn(
-      { team_id: args.team_id, err },
+      {
+        team_id: args.team_id,
+        error: err instanceof Error ? err.message : String(err),
+      },
       "Workspace introspection failed, proceeding without context",
     );
   }
@@ -108,14 +113,10 @@ export async function generatePlanCore(
 
     responseText = completion.choices[0]?.message?.content ?? "";
   } catch (err) {
-    throw new ExternalServiceError(
-      "OpenRouter API call failed",
-      "openrouter",
-      {
-        model,
-        error: err instanceof Error ? err.message : String(err),
-      },
-    );
+    throw new ExternalServiceError("OpenRouter API call failed", "openrouter", {
+      model,
+      error: err instanceof Error ? err.message : String(err),
+    });
   }
 
   if (!responseText) {
@@ -164,6 +165,9 @@ export async function generatePlan(
   args: GeneratePlanInput,
   logger: Logger,
 ): Promise<ToolSuccess<{ plan_id: string; summary: PlanSummary }>> {
+  const validation = validateToolInput(GeneratePlanInputSchema, args);
+  if (!validation.success) throw validation.error;
+
   const { plan, summary } = await generatePlanCore(args, logger);
   const planId = storePlan(plan);
   return success({ plan_id: planId, summary });

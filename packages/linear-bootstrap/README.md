@@ -34,9 +34,9 @@ Read team conventions from Linear: workflow states, labels, cycles, existing pro
 
 **Input:**
 
-| Field | Type | Required | Description |
-|-------|------|----------|-------------|
-| `team_id` | string | yes | Linear team ID |
+| Field     | Type   | Required | Description    |
+| --------- | ------ | -------- | -------------- |
+| `team_id` | string | yes      | Linear team ID |
 
 **Returns:** `WorkspaceContext` — team name, workflow states, default state, labels (with parent groups), custom fields, cycle info, existing projects
 
@@ -48,27 +48,27 @@ Auto-introspects the workspace when `LINEAR_API_KEY` is available, so generated 
 
 **Input:**
 
-| Field | Type | Required | Description |
-|-------|------|----------|-------------|
-| `description` | string | yes | Natural language project description |
-| `team_id` | string | yes | Linear team ID |
-| `complexity` | `"small" \| "medium" \| "large"` | no | Scale hint (default: `"medium"`) |
-| `project_type` | `"feature" \| "infrastructure" \| "api" \| "migration"` | no | Archetype (default: `"feature"`) |
-| `preferences.milestone_style` | `"time-based" \| "deliverable-based" \| "hybrid"` | no | Milestone naming style |
-| `preferences.issue_detail_level` | `"titles-only" \| "with-descriptions" \| "full-acceptance-criteria"` | no | Issue detail level |
-| `preferences.include_infrastructure` | boolean | no | Include infra/DevOps epic |
-| `preferences.include_docs` | boolean | no | Include documentation epic |
+| Field                                | Type                                                                 | Required | Description                          |
+| ------------------------------------ | -------------------------------------------------------------------- | -------- | ------------------------------------ |
+| `description`                        | string                                                               | yes      | Natural language project description |
+| `team_id`                            | string                                                               | yes      | Linear team ID                       |
+| `complexity`                         | `"small" \| "medium" \| "large"`                                     | no       | Scale hint (default: `"medium"`)     |
+| `project_type`                       | `"feature" \| "infrastructure" \| "api" \| "migration"`              | no       | Archetype (default: `"feature"`)     |
+| `preferences.milestone_style`        | `"time-based" \| "deliverable-based" \| "hybrid"`                    | no       | Milestone naming style               |
+| `preferences.issue_detail_level`     | `"titles-only" \| "with-descriptions" \| "full-acceptance-criteria"` | no       | Issue detail level                   |
+| `preferences.include_infrastructure` | boolean                                                              | no       | Include infra/DevOps epic            |
+| `preferences.include_docs`           | boolean                                                              | no       | Include documentation epic           |
 
 **Returns:** `{ plan_id, summary }` — plan reference + statistics (total issues, epics, milestones, estimated points)
 
 **Project Archetypes:**
 
-| Type | Example Milestones | Example Epics |
-|------|-------------------|---------------|
-| `feature` | Spec & design, MVP behind feature flag, Public launch | Backend APIs, Web UI, Analytics |
-| `infrastructure` | Prototype, Dogfood for one service, Org-wide rollout | Core infra changes, Service migrations, Monitoring |
-| `api` | API design sign-off, Backend implementation, General availability | Auth & rate limiting, Core endpoints, SDKs & DX |
-| `migration` | Dual-write in place, Backfill completed, Cutover | Data modeling, Backfill jobs, Cutover runbook |
+| Type             | Example Milestones                                                | Example Epics                                      |
+| ---------------- | ----------------------------------------------------------------- | -------------------------------------------------- |
+| `feature`        | Spec & design, MVP behind feature flag, Public launch             | Backend APIs, Web UI, Analytics                    |
+| `infrastructure` | Prototype, Dogfood for one service, Org-wide rollout              | Core infra changes, Service migrations, Monitoring |
+| `api`            | API design sign-off, Backend implementation, General availability | Auth & rate limiting, Core endpoints, SDKs & DX    |
+| `migration`      | Dual-write in place, Backfill completed, Cutover                  | Data modeling, Backfill jobs, Cutover runbook      |
 
 ### validate-plan
 
@@ -76,27 +76,27 @@ Validate a project plan for structural issues. Pure logic, no external calls.
 
 **Input:**
 
-| Field | Type | Required | Description |
-|-------|------|----------|-------------|
-| `plan_id` | string | one required | Plan ID from generate-plan |
-| `plan` | Plan | one required | Or inline plan object |
-| `preferences` | object | no | Same preferences as generate-plan |
+| Field         | Type   | Required     | Description                       |
+| ------------- | ------ | ------------ | --------------------------------- |
+| `plan_id`     | string | one required | Plan ID from generate-plan        |
+| `plan`        | Plan   | one required | Or inline plan object             |
+| `preferences` | object | no           | Same preferences as generate-plan |
 
 **Returns:** `{ valid, errors, warnings }` — boolean validity + arrays of `{ code, message, path? }`
 
 **Validation checks:**
 
-| Code | Severity | Description |
-|------|----------|-------------|
-| `CIRCULAR_DEPENDENCY` | error | Cycle in depends_on graph |
-| `ORPHANED_DEPENDENCY` | error | depends_on references non-existent title |
-| `UNDEFINED_MILESTONE` | error | Epic references missing milestone |
-| `EMPTY_EPIC` | error | Epic with 0 issues |
-| `DUPLICATE_TITLE` | error | Same issue title appears twice |
-| `LARGE_EPIC` | warning | Epic with >12 issues |
-| `HIGH_ESTIMATE` | warning | Issue estimate >5 points |
-| `NO_INFRASTRUCTURE_EPIC` | warning | include_infrastructure set but no infra epic |
-| `EMPTY_DESCRIPTION` | warning | Epic has empty description |
+| Code                     | Severity | Description                                  |
+| ------------------------ | -------- | -------------------------------------------- |
+| `CIRCULAR_DEPENDENCY`    | error    | Cycle in depends_on graph                    |
+| `ORPHANED_DEPENDENCY`    | error    | depends_on references non-existent title     |
+| `UNDEFINED_MILESTONE`    | error    | Epic references missing milestone            |
+| `EMPTY_EPIC`             | error    | Epic with 0 issues                           |
+| `DUPLICATE_TITLE`        | error    | Same issue title appears twice               |
+| `LARGE_EPIC`             | warning  | Epic with >12 issues                         |
+| `HIGH_ESTIMATE`          | warning  | Issue estimate >5 points                     |
+| `NO_INFRASTRUCTURE_EPIC` | warning  | include_infrastructure set but no infra epic |
+| `EMPTY_DESCRIPTION`      | warning  | Epic has empty description                   |
 
 ### bootstrap-project
 
@@ -104,16 +104,17 @@ Create a complete Linear project from a plan. Creates project, milestones, label
 
 **Input:**
 
-| Field | Type | Required | Description |
-|-------|------|----------|-------------|
-| `plan_id` | string | one required | Plan ID from generate-plan |
-| `plan` | Plan | one required | Or inline plan object |
-| `team_id` | string | yes | Linear team ID |
-| `dry_run` | boolean | no | Validate only, don't create (default: `false`) |
+| Field     | Type    | Required     | Description                                    |
+| --------- | ------- | ------------ | ---------------------------------------------- |
+| `plan_id` | string  | one required | Plan ID from generate-plan                     |
+| `plan`    | Plan    | one required | Or inline plan object                          |
+| `team_id` | string  | yes          | Linear team ID                                 |
+| `dry_run` | boolean | no           | Validate only, don't create (default: `false`) |
 
 **Returns:** `{ project_id, milestone_ids, label_ids, epic_ids, issue_ids, dependency_count }` — maps of name/title to Linear ID for all created resources
 
 **Behavior:**
+
 - Validates plan before execution; returns validation errors as data if invalid
 - Checks for existing project with same name (idempotency)
 - Creates resources in order: project, milestones, labels, epics, issues, dependencies
@@ -126,13 +127,13 @@ Add a single epic with its child issues to an existing Linear project.
 
 **Input:**
 
-| Field | Type | Required | Description |
-|-------|------|----------|-------------|
-| `project_id` | string | yes | Existing Linear project ID |
-| `team_id` | string | yes | Linear team ID |
-| `epic` | Epic | yes | Epic object with issues |
-| `milestone_id` | string | no | Milestone to wire epic to |
-| `label_ids` | Record<string, string> | no | Label name-to-ID mapping |
+| Field          | Type                   | Required | Description                |
+| -------------- | ---------------------- | -------- | -------------------------- |
+| `project_id`   | string                 | yes      | Existing Linear project ID |
+| `team_id`      | string                 | yes      | Linear team ID             |
+| `epic`         | Epic                   | yes      | Epic object with issues    |
+| `milestone_id` | string                 | no       | Milestone to wire epic to  |
+| `label_ids`    | Record<string, string> | no       | Label name-to-ID mapping   |
 
 **Returns:** `{ epic_id, issue_ids }` — created epic ID + map of issue titles to IDs
 
@@ -142,24 +143,198 @@ Compound tool that generates a plan, validates it, and bootstraps it in Linear i
 
 **Input:**
 
-| Field | Type | Required | Description |
-|-------|------|----------|-------------|
-| `description` | string | yes | Natural language project description |
-| `team_id` | string | yes | Linear team ID |
-| `complexity` | `"small" \| "medium" \| "large"` | no | Scale hint (default: `"medium"`) |
-| `project_type` | `"feature" \| "infrastructure" \| "api" \| "migration"` | no | Archetype (default: `"feature"`) |
-| `preferences` | object | no | Same as generate-plan |
-| `dry_run` | boolean | no | Generate + validate only (default: `false`) |
+| Field          | Type                                                    | Required | Description                                 |
+| -------------- | ------------------------------------------------------- | -------- | ------------------------------------------- |
+| `description`  | string                                                  | yes      | Natural language project description        |
+| `team_id`      | string                                                  | yes      | Linear team ID                              |
+| `complexity`   | `"small" \| "medium" \| "large"`                        | no       | Scale hint (default: `"medium"`)            |
+| `project_type` | `"feature" \| "infrastructure" \| "api" \| "migration"` | no       | Archetype (default: `"feature"`)            |
+| `preferences`  | object                                                  | no       | Same as generate-plan                       |
+| `dry_run`      | boolean                                                 | no       | Generate + validate only (default: `false`) |
 
 **Returns:** `{ plan_id, summary, validation, bootstrap? }` — plan reference, stats, validation result, and bootstrap result (when not dry_run and validation passes)
 
+## Examples
+
+### list-teams
+
+**Input:**
+
+```json
+{}
+```
+
+**Output:**
+
+```json
+[
+  { "id": "team-abc123", "name": "Engineering", "key": "ENG" },
+  { "id": "team-def456", "name": "Design", "key": "DES" }
+]
+```
+
+### introspect-workspace
+
+**Input:**
+
+```json
+{ "team_id": "team-abc123" }
+```
+
+**Output:**
+
+```json
+{
+  "team_name": "Engineering",
+  "workflow_states": [
+    { "id": "state-1", "name": "Backlog", "type": "backlog" },
+    { "id": "state-2", "name": "In Progress", "type": "started" }
+  ],
+  "default_state_id": "state-1",
+  "default_state_name": "Backlog",
+  "labels": [{ "id": "label-1", "name": "backend" }],
+  "custom_fields": [],
+  "cycles_enabled": true,
+  "active_cycle": {
+    "id": "cycle-1",
+    "name": "Cycle 12",
+    "starts_at": "2026-03-01T00:00:00Z",
+    "ends_at": "2026-03-14T00:00:00Z"
+  },
+  "existing_projects": [
+    { "id": "proj-1", "name": "Auth Revamp", "state": "started" }
+  ]
+}
+```
+
+### generate-plan
+
+**Input:**
+
+```json
+{
+  "description": "Build a Slack integration for posting Linear updates",
+  "team_id": "team-abc123",
+  "complexity": "medium",
+  "project_type": "feature"
+}
+```
+
+**Output:**
+
+```json
+{
+  "plan_id": "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
+  "summary": {
+    "total_issues": 12,
+    "total_epics": 3,
+    "total_milestones": 2,
+    "estimated_points": 34
+  }
+}
+```
+
+### validate-plan
+
+**Input:**
+
+```json
+{ "plan_id": "a1b2c3d4-e5f6-7890-abcd-ef1234567890" }
+```
+
+**Output:**
+
+```json
+{
+  "valid": true,
+  "errors": [],
+  "warnings": [
+    {
+      "code": "HIGH_ESTIMATE",
+      "message": "Issue estimate 8 exceeds 5",
+      "path": "epics[1].issues[2]"
+    }
+  ]
+}
+```
+
+### bootstrap-project
+
+**Input:**
+
+```json
+{
+  "plan_id": "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
+  "team_id": "team-abc123"
+}
+```
+
+**Output:**
+
+```json
+{
+  "project_id": "proj-new789",
+  "milestone_ids": { "MVP": "ms-001", "Launch": "ms-002" },
+  "label_ids": { "backend": "label-1", "frontend": "label-2" },
+  "epic_ids": { "Slack OAuth": "issue-100" },
+  "issue_ids": {
+    "Implement OAuth flow": "issue-101",
+    "Store tokens": "issue-102"
+  },
+  "dependency_count": 3
+}
+```
+
+### add-epic
+
+**Input:**
+
+```json
+{
+  "project_id": "proj-new789",
+  "team_id": "team-abc123",
+  "epic": {
+    "title": "Monitoring",
+    "description": "Add observability for the Slack integration",
+    "milestone": "Launch",
+    "issues": [
+      {
+        "title": "Add Datadog metrics",
+        "labels": ["backend"],
+        "priority": 2,
+        "depends_on": []
+      },
+      {
+        "title": "Create alert runbook",
+        "labels": ["docs"],
+        "priority": 3,
+        "depends_on": ["Add Datadog metrics"]
+      }
+    ]
+  },
+  "milestone_id": "ms-002"
+}
+```
+
+**Output:**
+
+```json
+{
+  "epic_id": "issue-200",
+  "issue_ids": {
+    "Add Datadog metrics": "issue-201",
+    "Create alert runbook": "issue-202"
+  }
+}
+```
+
 ## Required Environment Variables
 
-| Variable | Required By | Description |
-|----------|-------------|-------------|
-| `LLM_API_KEY` | generate-plan, generate-and-bootstrap | OpenRouter API key |
-| `LINEAR_API_KEY` | bootstrap-project, add-epic, generate-and-bootstrap | Linear API key |
-| `LLM_MODEL` | generate-plan (optional) | Override LLM model (default: `anthropic/claude-sonnet-4`) |
+| Variable         | Required By                                         | Description                                               |
+| ---------------- | --------------------------------------------------- | --------------------------------------------------------- |
+| `LLM_API_KEY`    | generate-plan, generate-and-bootstrap               | OpenRouter API key                                        |
+| `LINEAR_API_KEY` | bootstrap-project, add-epic, generate-and-bootstrap | Linear API key                                            |
+| `LLM_MODEL`      | generate-plan (optional)                            | Override LLM model (default: `anthropic/claude-sonnet-4`) |
 
 ## MCP Client Configuration
 

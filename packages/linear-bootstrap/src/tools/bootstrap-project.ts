@@ -3,17 +3,19 @@ import {
   type ToolSuccess,
   success,
   PartialExecutionError,
+  validateToolInput,
 } from "@toolwright-adk/shared";
 import { LinearApiClient } from "../linear/client.js";
 import { validatePlan } from "./validate-plan.js";
 import { resolvePlan } from "../plan-cache.js";
 import { retrieveWorkspaceContext } from "../workspace-cache.js";
-import type {
-  BootstrapProjectInput,
-  BootstrapResult,
-  PlanValidationResult,
-  Plan,
-  WorkspaceContext,
+import {
+  BootstrapProjectInputSchema,
+  type BootstrapProjectInput,
+  type BootstrapResult,
+  type PlanValidationResult,
+  type Plan,
+  type WorkspaceContext,
 } from "../types.js";
 
 export function buildExistingLabelMap(
@@ -43,6 +45,9 @@ export async function bootstrapProject(
   args: BootstrapProjectInput,
   logger: Logger,
 ): Promise<ToolSuccess<BootstrapResult | PlanValidationResult>> {
+  const inputValidation = validateToolInput(BootstrapProjectInputSchema, args);
+  if (!inputValidation.success) throw inputValidation.error;
+
   const plan = resolvePlan(args);
   const { team_id, dry_run } = args;
 
@@ -142,7 +147,10 @@ export async function bootstrapProject(
         completed.push(`label:${label.id}`);
       } catch (err) {
         logger.warn(
-          { labelName, err },
+          {
+            labelName,
+            error: err instanceof Error ? err.message : String(err),
+          },
           `Failed to create label "${labelName}", skipping`,
         );
         failed.push(`label:${labelName}`);
@@ -180,8 +188,7 @@ export async function bootstrapProject(
               estimate: issue.estimate,
               projectId: project.id,
               projectMilestoneId: milestoneId,
-              labelIds:
-                issueLabelIds.length > 0 ? issueLabelIds : undefined,
+              labelIds: issueLabelIds.length > 0 ? issueLabelIds : undefined,
               parentId: epicIssue.id,
               ...(defaultStateId ? { stateId: defaultStateId } : {}),
             });
@@ -220,7 +227,11 @@ export async function bootstrapProject(
               completed.push(`dependency:${depId}->${childId}`);
             } catch (err) {
               logger.warn(
-                { issueTitle: issue.title, depTitle, err },
+                {
+                  issueTitle: issue.title,
+                  depTitle,
+                  error: err instanceof Error ? err.message : String(err),
+                },
                 `Failed to set dependency "${depTitle}" -> "${issue.title}"`,
               );
               failed.push(`dependency:${depTitle}->${issue.title}`);

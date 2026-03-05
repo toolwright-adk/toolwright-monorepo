@@ -1,10 +1,5 @@
 import { LinearClient, LinearDocument } from "@linear/sdk";
-import type {
-  Project,
-  ProjectMilestone,
-  Issue,
-  IssueLabel,
-} from "@linear/sdk";
+import type { Project, ProjectMilestone, Issue, IssueLabel } from "@linear/sdk";
 import {
   ExternalServiceError,
   withTiming,
@@ -85,14 +80,12 @@ export class LinearApiClient {
     description?: string;
     targetDate?: string;
   }): Promise<Project> {
-    const { result: payload } = await withTiming(
-      "linear-create-project",
-      () =>
-        withRetry(
-          "createProject",
-          () => this.client.createProject(input),
-          this.logger,
-        ),
+    const { result: payload } = await withTiming("linear-create-project", () =>
+      withRetry(
+        "createProject",
+        () => this.client.createProject(input),
+        this.logger,
+      ),
     );
 
     if (!payload.success) {
@@ -191,10 +184,7 @@ export class LinearApiClient {
       );
     }
 
-    this.logger.info(
-      { issueId: issue.id },
-      `Created issue "${input.title}"`,
-    );
+    this.logger.info({ issueId: issue.id }, `Created issue "${input.title}"`);
     return issue;
   }
 
@@ -227,10 +217,7 @@ export class LinearApiClient {
       );
     }
 
-    this.logger.info(
-      { labelId: label.id },
-      `Created label "${input.name}"`,
-    );
+    this.logger.info({ labelId: label.id }, `Created label "${input.name}"`);
     return label;
   }
 
@@ -240,19 +227,17 @@ export class LinearApiClient {
   ): Promise<void> {
     // depends_on means "issueId depends on blockedByIssueId"
     // In Linear: blockedByIssueId blocks issueId
-    const { result: payload } = await withTiming(
-      "linear-set-dependency",
-      () =>
-        withRetry(
-          "setDependency",
-          () =>
-            this.client.createIssueRelation({
-              issueId: blockedByIssueId,
-              relatedIssueId: issueId,
-              type: LinearDocument.IssueRelationType.Blocks,
-            }),
-          this.logger,
-        ),
+    const { result: payload } = await withTiming("linear-set-dependency", () =>
+      withRetry(
+        "setDependency",
+        () =>
+          this.client.createIssueRelation({
+            issueId: blockedByIssueId,
+            relatedIssueId: issueId,
+            type: LinearDocument.IssueRelationType.Blocks,
+          }),
+        this.logger,
+      ),
     );
 
     if (!payload.success) {
@@ -271,22 +256,20 @@ export class LinearApiClient {
   async getTeamWorkflowStates(
     teamId: string,
   ): Promise<{ id: string; name: string; type: string }[]> {
-    const { result: states } = await withTiming(
-      "linear-get-team-states",
-      () =>
-        withRetry(
-          "getTeamWorkflowStates",
-          async () => {
-            const team = await this.client.team(teamId);
-            const connection = await team.states({ first: 100 });
-            return connection.nodes.map((s) => ({
-              id: s.id,
-              name: s.name,
-              type: s.type,
-            }));
-          },
-          this.logger,
-        ),
+    const { result: states } = await withTiming("linear-get-team-states", () =>
+      withRetry(
+        "getTeamWorkflowStates",
+        async () => {
+          const team = await this.client.team(teamId);
+          const connection = await team.states({ first: 100 });
+          return connection.nodes.map((s) => ({
+            id: s.id,
+            name: s.name,
+            type: s.type,
+          }));
+        },
+        this.logger,
+      ),
     );
     return states;
   }
@@ -294,31 +277,29 @@ export class LinearApiClient {
   async getTeamLabels(
     teamId: string,
   ): Promise<{ id: string; name: string; parent_name?: string }[]> {
-    const { result: labels } = await withTiming(
-      "linear-get-team-labels",
-      () =>
-        withRetry(
-          "getTeamLabels",
-          async () => {
-            const team = await this.client.team(teamId);
-            const connection = await team.labels({ first: 100 });
-            const results: {
-              id: string;
-              name: string;
-              parent_name?: string;
-            }[] = [];
-            for (const label of connection.nodes) {
-              const parent = await label.parent;
-              results.push({
-                id: label.id,
-                name: label.name,
-                ...(parent ? { parent_name: parent.name } : {}),
-              });
-            }
-            return results;
-          },
-          this.logger,
-        ),
+    const { result: labels } = await withTiming("linear-get-team-labels", () =>
+      withRetry(
+        "getTeamLabels",
+        async () => {
+          const team = await this.client.team(teamId);
+          const connection = await team.labels({ first: 100 });
+          const results: {
+            id: string;
+            name: string;
+            parent_name?: string;
+          }[] = [];
+          for (const label of connection.nodes) {
+            const parent = await label.parent;
+            results.push({
+              id: label.id,
+              name: label.name,
+              ...(parent ? { parent_name: parent.name } : {}),
+            });
+          }
+          return results;
+        },
+        this.logger,
+      ),
     );
     return labels;
   }
@@ -326,19 +307,17 @@ export class LinearApiClient {
   async getTeamDefaultState(
     teamId: string,
   ): Promise<{ id: string; name: string } | undefined> {
-    const { result: state } = await withTiming(
-      "linear-get-default-state",
-      () =>
-        withRetry(
-          "getTeamDefaultState",
-          async () => {
-            const team = await this.client.team(teamId);
-            const defaultState = await team.defaultIssueState;
-            if (!defaultState) return undefined;
-            return { id: defaultState.id, name: defaultState.name };
-          },
-          this.logger,
-        ),
+    const { result: state } = await withTiming("linear-get-default-state", () =>
+      withRetry(
+        "getTeamDefaultState",
+        async () => {
+          const team = await this.client.team(teamId);
+          const defaultState = await team.defaultIssueState;
+          if (!defaultState) return undefined;
+          return { id: defaultState.id, name: defaultState.name };
+        },
+        this.logger,
+      ),
     );
     return state;
   }
@@ -346,29 +325,25 @@ export class LinearApiClient {
   async getTeamActiveCycle(
     teamId: string,
   ): Promise<
-    | { id: string; name: string; starts_at: string; ends_at: string }
-    | undefined
+    { id: string; name: string; starts_at: string; ends_at: string } | undefined
   > {
-    const { result: cycle } = await withTiming(
-      "linear-get-active-cycle",
-      () =>
-        withRetry(
-          "getTeamActiveCycle",
-          async () => {
-            const team = await this.client.team(teamId);
-            if (!team.cyclesEnabled) return undefined;
-            const activeCycle = await team.activeCycle;
-            if (!activeCycle) return undefined;
-            return {
-              id: activeCycle.id,
-              name:
-                activeCycle.name ?? `Cycle ${activeCycle.number}`,
-              starts_at: activeCycle.startsAt.toISOString(),
-              ends_at: activeCycle.endsAt.toISOString(),
-            };
-          },
-          this.logger,
-        ),
+    const { result: cycle } = await withTiming("linear-get-active-cycle", () =>
+      withRetry(
+        "getTeamActiveCycle",
+        async () => {
+          const team = await this.client.team(teamId);
+          if (!team.cyclesEnabled) return undefined;
+          const activeCycle = await team.activeCycle;
+          if (!activeCycle) return undefined;
+          return {
+            id: activeCycle.id,
+            name: activeCycle.name ?? `Cycle ${activeCycle.number}`,
+            starts_at: activeCycle.startsAt.toISOString(),
+            ends_at: activeCycle.endsAt.toISOString(),
+          };
+        },
+        this.logger,
+      ),
     );
     return cycle;
   }
@@ -439,20 +414,39 @@ export class LinearApiClient {
   }
 
   async getProjectByName(name: string): Promise<Project | null> {
-    const { result: connection } = await withTiming(
-      "linear-get-project",
-      () =>
-        withRetry(
-          "getProjectByName",
-          () =>
-            this.client.projects({
-              filter: { name: { eqIgnoreCase: name } },
-              first: 1,
-            }),
-          this.logger,
-        ),
+    const { result: connection } = await withTiming("linear-get-project", () =>
+      withRetry(
+        "getProjectByName",
+        () =>
+          this.client.projects({
+            filter: { name: { eqIgnoreCase: name } },
+            first: 1,
+          }),
+        this.logger,
+      ),
     );
 
     return connection.nodes[0] ?? null;
+  }
+
+  async getProjectIssues(
+    projectId: string,
+  ): Promise<{ id: string; title: string }[]> {
+    const { result: issues } = await withTiming(
+      "linear-get-project-issues",
+      () =>
+        withRetry(
+          "getProjectIssues",
+          async () => {
+            const connection = await this.client.issues({
+              filter: { project: { id: { eq: projectId } } },
+              first: 250,
+            });
+            return connection.nodes.map((i) => ({ id: i.id, title: i.title }));
+          },
+          this.logger,
+        ),
+    );
+    return issues;
   }
 }

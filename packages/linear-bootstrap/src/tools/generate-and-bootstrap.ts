@@ -2,16 +2,18 @@ import {
   type Logger,
   type ToolSuccess,
   success,
+  validateToolInput,
 } from "@toolwright-adk/shared";
 import { generatePlanCore } from "./generate-plan.js";
 import { validatePlan } from "./validate-plan.js";
 import { bootstrapProject } from "./bootstrap-project.js";
 import { storePlan } from "../plan-cache.js";
-import type {
-  GenerateAndBootstrapInput,
-  PlanSummary,
-  PlanValidationResult,
-  BootstrapResult,
+import {
+  GenerateAndBootstrapInputSchema,
+  type GenerateAndBootstrapInput,
+  type PlanSummary,
+  type PlanValidationResult,
+  type BootstrapResult,
 } from "../types.js";
 
 interface GenerateAndBootstrapResult {
@@ -25,6 +27,12 @@ export async function generateAndBootstrap(
   args: GenerateAndBootstrapInput,
   logger: Logger,
 ): Promise<ToolSuccess<GenerateAndBootstrapResult>> {
+  const inputValidation = validateToolInput(
+    GenerateAndBootstrapInputSchema,
+    args,
+  );
+  if (!inputValidation.success) throw inputValidation.error;
+
   // Step 1: Generate plan
   const { plan, summary } = await generatePlanCore(args, logger);
   const planId = storePlan(plan);

@@ -8,11 +8,27 @@ import {
   withTiming,
   error as toolError,
   ToolwrightError,
+  ExternalServiceError,
 } from "@toolwright-adk/shared";
+
+function handleToolError(err: unknown, toolName: string): CallToolResult {
+  if (err instanceof ToolwrightError) {
+    return { ...toolError(err) };
+  }
+  const message =
+    err instanceof Error ? err.message : "An unexpected error occurred";
+  const wrapped = new ExternalServiceError(
+    `${toolName} failed: ${message}`,
+    "unknown",
+  );
+  return { ...toolError(wrapped) };
+}
 import {
   GeneratePlanInputSchema,
   ValidatePlanInputSchema,
+  ValidatePlanInputObject,
   BootstrapProjectInputSchema,
+  BootstrapProjectInputObject,
   AddEpicInputSchema,
   GenerateAndBootstrapInputSchema,
   IntrospectWorkspaceInputSchema,
@@ -51,10 +67,7 @@ server.tool(
       );
       return { ...result };
     } catch (err) {
-      if (err instanceof ToolwrightError) {
-        return { ...toolError(err) };
-      }
-      throw err;
+      return handleToolError(err, "generate-plan");
     }
   },
 );
@@ -62,7 +75,7 @@ server.tool(
 server.tool(
   "validate-plan",
   "Validate a project plan for structural issues. Accepts plan_id (from generate-plan) or inline plan object. Checks for circular dependencies, orphaned references, undefined milestones, and other problems.",
-  ValidatePlanInputSchema.shape,
+  ValidatePlanInputObject.shape,
   async (args): Promise<CallToolResult> => {
     const ctx = {
       requestId: generateRequestId(),
@@ -77,10 +90,7 @@ server.tool(
       );
       return { ...result };
     } catch (err) {
-      if (err instanceof ToolwrightError) {
-        return { ...toolError(err) };
-      }
-      throw err;
+      return handleToolError(err, "validate-plan");
     }
   },
 );
@@ -88,7 +98,7 @@ server.tool(
 server.tool(
   "bootstrap-project",
   "Create a complete Linear project from a plan. Accepts plan_id (from generate-plan) or inline plan object. Creates project, milestones, labels, epics, issues, and dependencies. Set dry_run=true to validate only.",
-  BootstrapProjectInputSchema.shape,
+  BootstrapProjectInputObject.shape,
   async (args): Promise<CallToolResult> => {
     const ctx = {
       requestId: generateRequestId(),
@@ -99,17 +109,11 @@ server.tool(
 
     try {
       const { result } = await runWithContext(ctx, () =>
-        withTiming(
-          "bootstrap-project",
-          () => bootstrapProject(args, logger),
-        ),
+        withTiming("bootstrap-project", () => bootstrapProject(args, logger)),
       );
       return { ...result };
     } catch (err) {
-      if (err instanceof ToolwrightError) {
-        return { ...toolError(err) };
-      }
-      throw err;
+      return handleToolError(err, "bootstrap-project");
     }
   },
 );
@@ -132,10 +136,7 @@ server.tool(
       );
       return { ...result };
     } catch (err) {
-      if (err instanceof ToolwrightError) {
-        return { ...toolError(err) };
-      }
-      throw err;
+      return handleToolError(err, "add-epic");
     }
   },
 );
@@ -154,17 +155,13 @@ server.tool(
 
     try {
       const { result } = await runWithContext(ctx, () =>
-        withTiming(
-          "introspect-workspace",
-          () => introspectWorkspace(args, logger),
+        withTiming("introspect-workspace", () =>
+          introspectWorkspace(args, logger),
         ),
       );
       return { ...result };
     } catch (err) {
-      if (err instanceof ToolwrightError) {
-        return { ...toolError(err) };
-      }
-      throw err;
+      return handleToolError(err, "introspect-workspace");
     }
   },
 );
@@ -183,17 +180,13 @@ server.tool(
 
     try {
       const { result } = await runWithContext(ctx, () =>
-        withTiming(
-          "generate-and-bootstrap",
-          () => generateAndBootstrap(args, logger),
+        withTiming("generate-and-bootstrap", () =>
+          generateAndBootstrap(args, logger),
         ),
       );
       return { ...result };
     } catch (err) {
-      if (err instanceof ToolwrightError) {
-        return { ...toolError(err) };
-      }
-      throw err;
+      return handleToolError(err, "generate-and-bootstrap");
     }
   },
 );
@@ -216,10 +209,7 @@ server.tool(
       );
       return { ...result };
     } catch (err) {
-      if (err instanceof ToolwrightError) {
-        return { ...toolError(err) };
-      }
-      throw err;
+      return handleToolError(err, "list-teams");
     }
   },
 );

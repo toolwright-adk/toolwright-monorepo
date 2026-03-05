@@ -3,16 +3,40 @@ import {
   type ToolSuccess,
   success,
   PartialExecutionError,
+  validateToolInput,
 } from "@toolwright-adk/shared";
 import { LinearApiClient } from "../linear/client.js";
-import type { AddEpicInput, AddEpicResult } from "../types.js";
+import {
+  AddEpicInputSchema,
+  type AddEpicInput,
+  type AddEpicResult,
+} from "../types.js";
 
 export async function addEpic(
   args: AddEpicInput,
   logger: Logger,
 ): Promise<ToolSuccess<AddEpicResult>> {
+  const validation = validateToolInput(AddEpicInputSchema, args);
+  if (!validation.success) throw validation.error;
+
   const { project_id, team_id, epic, milestone_id, label_ids } = args;
   const client = new LinearApiClient(logger);
+
+  // Idempotency check: skip if epic with same title already exists in project
+  const existingIssues = await client.getProjectIssues(project_id);
+  const existingEpic = existingIssues.find(
+    (i) => i.title.toLowerCase() === epic.title.toLowerCase(),
+  );
+  if (existingEpic) {
+    logger.warn(
+      { epicId: existingEpic.id, title: epic.title },
+      "Epic already exists, aborting to prevent duplicates",
+    );
+    return success({
+      epic_id: existingEpic.id,
+      issue_ids: {},
+    } satisfies AddEpicResult);
+  }
 
   const completed: string[] = [];
   const failed: string[] = [];
@@ -70,7 +94,11 @@ export async function addEpic(
             await client.setDependency(childId, depId);
           } catch (err) {
             logger.warn(
-              { issueTitle: issue.title, depTitle, err },
+              {
+                issueTitle: issue.title,
+                depTitle,
+                error: err instanceof Error ? err.message : String(err),
+              },
               `Failed to set dependency in add-epic`,
             );
           }

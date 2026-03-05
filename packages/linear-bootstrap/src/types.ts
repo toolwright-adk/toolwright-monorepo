@@ -82,18 +82,26 @@ export const PlanValidationResultSchema = z.object({
 
 // --- Tool input schemas ---
 
-export const ValidatePlanInputSchema = z.object({
+export const ValidatePlanInputObject = z.object({
   plan: PlanSchema.optional(),
   plan_id: z.string().optional(),
   preferences: GeneratePlanInputSchema.shape.preferences,
 });
+export const ValidatePlanInputSchema = ValidatePlanInputObject.refine(
+  (data) => data.plan !== undefined || data.plan_id !== undefined,
+  { message: "Either plan or plan_id is required" },
+);
 
-export const BootstrapProjectInputSchema = z.object({
+export const BootstrapProjectInputObject = z.object({
   plan: PlanSchema.optional(),
   plan_id: z.string().optional(),
   team_id: z.string(),
   dry_run: z.boolean().default(false),
 });
+export const BootstrapProjectInputSchema = BootstrapProjectInputObject.refine(
+  (data) => data.plan !== undefined || data.plan_id !== undefined,
+  { message: "Either plan or plan_id is required" },
+);
 
 export const GenerateAndBootstrapInputSchema = GeneratePlanInputSchema.extend({
   dry_run: z.boolean().default(false),

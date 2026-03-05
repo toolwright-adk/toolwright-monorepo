@@ -1,6 +1,7 @@
 import { describe, it, expect } from "vitest";
 import {
   PlanSchema,
+  ValidatePlanInputSchema,
   BootstrapProjectInputSchema,
   GeneratePlanInputSchema,
   IntrospectWorkspaceInputSchema,
@@ -9,9 +10,7 @@ import {
 
 const validPlan = {
   project: { name: "Test", description: "Test project" },
-  milestones: [
-    { name: "M1", description: "First", sort_order: 0 },
-  ],
+  milestones: [{ name: "M1", description: "First", sort_order: 0 }],
   epics: [
     {
       title: "Epic 1",
@@ -49,9 +48,7 @@ describe("PlanSchema", () => {
       epics: [
         {
           ...validPlan.epics[0],
-          issues: [
-            { title: "Bad", labels: [], priority: 0, depends_on: [] },
-          ],
+          issues: [{ title: "Bad", labels: [], priority: 0, depends_on: [] }],
         },
       ],
     });
@@ -64,9 +61,7 @@ describe("PlanSchema", () => {
       epics: [
         {
           ...validPlan.epics[0],
-          issues: [
-            { title: "Bad", labels: [], priority: 5, depends_on: [] },
-          ],
+          issues: [{ title: "Bad", labels: [], priority: 5, depends_on: [] }],
         },
       ],
     });
@@ -82,9 +77,7 @@ describe("PlanSchema", () => {
           title: "E1",
           description: "Epic",
           milestone: "M1",
-          issues: [
-            { title: "T1", labels: [], priority: 3, depends_on: [] },
-          ],
+          issues: [{ title: "T1", labels: [], priority: 3, depends_on: [] }],
         },
       ],
     });
@@ -200,5 +193,63 @@ describe("WorkspaceContextSchema", () => {
       team_name: "Engineering",
     });
     expect(result.success).toBe(false);
+  });
+});
+
+describe("ValidatePlanInputSchema refinement", () => {
+  it("rejects when neither plan nor plan_id is provided", () => {
+    const result = ValidatePlanInputSchema.safeParse({
+      preferences: undefined,
+    });
+    expect(result.success).toBe(false);
+    if (!result.success) {
+      expect(result.error.issues[0].message).toBe(
+        "Either plan or plan_id is required",
+      );
+    }
+  });
+
+  it("accepts when plan is provided", () => {
+    const result = ValidatePlanInputSchema.safeParse({
+      plan: validPlan,
+    });
+    expect(result.success).toBe(true);
+  });
+
+  it("accepts when plan_id is provided", () => {
+    const result = ValidatePlanInputSchema.safeParse({
+      plan_id: "some-id",
+    });
+    expect(result.success).toBe(true);
+  });
+});
+
+describe("BootstrapProjectInputSchema refinement", () => {
+  it("rejects when neither plan nor plan_id is provided", () => {
+    const result = BootstrapProjectInputSchema.safeParse({
+      team_id: "team-1",
+    });
+    expect(result.success).toBe(false);
+    if (!result.success) {
+      expect(result.error.issues[0].message).toBe(
+        "Either plan or plan_id is required",
+      );
+    }
+  });
+
+  it("accepts when plan is provided", () => {
+    const result = BootstrapProjectInputSchema.safeParse({
+      plan: validPlan,
+      team_id: "team-1",
+    });
+    expect(result.success).toBe(true);
+  });
+
+  it("accepts when plan_id is provided", () => {
+    const result = BootstrapProjectInputSchema.safeParse({
+      plan_id: "some-id",
+      team_id: "team-1",
+    });
+    expect(result.success).toBe(true);
   });
 });
