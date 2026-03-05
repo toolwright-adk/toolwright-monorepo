@@ -5,7 +5,7 @@ Standards for Toolwright MCP servers. Every server in this monorepo must meet th
 ## Security
 
 - **Input validation**: All tool inputs validated with Zod schemas via `validateToolInput()`. Never trust raw input.
-- **No secret logging**: API keys, tokens, and credentials must never appear in logs or error messages. Use `[REDACTED]` placeholders.
+- **No secret logging**: API keys, tokens, and credentials must never appear in logs or error messages. Use `[REDACTED]` placeholders. (`.env` files with real keys for local development are expected and not a concern.)
 - **Principle of least privilege**: Request only the API scopes and permissions each tool actually needs. Document required permissions in the tool's README.
 
 ## Reliability

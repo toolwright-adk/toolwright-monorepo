@@ -24,6 +24,16 @@ export function createLogger(
     base: {
       server: serverName,
     },
+    redact: {
+      paths: [
+        "*.apiKey",
+        "*.api_key",
+        "*.token",
+        "*.authorization",
+        "*.password",
+        "*.secret",
+      ],
+    },
   };
 
   if (options.destination) {

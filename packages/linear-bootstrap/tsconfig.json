@@ -9,11 +9,9 @@
     "forceConsistentCasingInFileNames": true,
     "declaration": true,
     "declarationMap": true,
-    "sourceMap": true
+    "sourceMap": true,
+    "outDir": "dist",
+    "rootDir": "src"
   },
-  "references": [
-    { "path": "packages/shared" },
-    { "path": "packages/linear-bootstrap" }
-  ],
-  "files": []
+  "include": ["src"]
 }
