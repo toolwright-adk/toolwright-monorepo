@@ -95,7 +95,8 @@ describe("bootstrapProject", () => {
     );
 
     assertToolSuccess(result);
-    const data = result._meta?.data as Record<string, unknown>;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const data = result._meta?.data as any;
     expect(data.project_id).toBe("project-1");
     expect(data.milestone_ids).toEqual({ M1: "milestone-1" });
     expect(data.epic_ids).toEqual({ "Epic 1": "epic-issue-1" });
@@ -112,7 +113,8 @@ describe("bootstrapProject", () => {
     );
 
     assertToolSuccess(result);
-    const data = result._meta?.data as Record<string, unknown>;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const data = result._meta?.data as any;
     expect(data.valid).toBeDefined();
     expect(mockGetProjectByName).not.toHaveBeenCalled();
     expect(mockCreateProject).not.toHaveBeenCalled();
@@ -150,7 +152,8 @@ describe("bootstrapProject", () => {
     );
 
     assertToolSuccess(result);
-    const data = result._meta?.data as Record<string, unknown>;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const data = result._meta?.data as any;
     expect(data.valid).toBe(false);
     expect(data.errors.length).toBeGreaterThan(0);
     expect(mockCreateProject).not.toHaveBeenCalled();
@@ -165,7 +168,8 @@ describe("bootstrapProject", () => {
     );
 
     assertToolSuccess(result);
-    const data = result._meta?.data as Record<string, unknown>;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const data = result._meta?.data as any;
     expect(data.project_id).toBe("existing-project");
     expect(data.milestone_ids).toEqual({});
     expect(mockCreateProject).not.toHaveBeenCalled();
@@ -190,7 +194,8 @@ describe("bootstrapProject", () => {
     );
 
     assertToolSuccess(result);
-    const data = result._meta?.data as Record<string, unknown>;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const data = result._meta?.data as any;
     expect(data.project_id).toBe("project-1");
     // Labels failed but bootstrap continued
     expect(Object.keys(data.label_ids)).toHaveLength(0);
@@ -225,7 +230,8 @@ describe("bootstrapProject", () => {
 
   it("throws ToolInputError when neither plan nor plan_id is provided", async () => {
     await expect(
-      bootstrapProject({ team_id: "team-1", dry_run: false } as Record<string, unknown>, logger),
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      bootstrapProject({ team_id: "team-1", dry_run: false } as any, logger),
     ).rejects.toThrow(ToolInputError);
   });
 });

@@ -88,7 +88,8 @@ describe("generatePlan", () => {
     );
 
     assertToolSuccess(result);
-    const data = result._meta?.data as Record<string, unknown>;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const data = result._meta?.data as any;
     expect(data.plan_id).toBeDefined();
     expect(typeof data.plan_id).toBe("string");
     expect(data.summary).toBeDefined();

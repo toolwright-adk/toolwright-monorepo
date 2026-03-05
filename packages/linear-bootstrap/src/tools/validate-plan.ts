@@ -166,15 +166,22 @@ function checkInfrastructureEpic(
 
 function checkDuplicateTitles(
   issues: IssueWithPath[],
+  epics: Plan["epics"],
   errors: ValidationIssue[],
 ): void {
   const seen = new Map<string, string>();
+
+  // Register epic titles first so collisions with issue titles are caught
+  for (let i = 0; i < epics.length; i++) {
+    seen.set(epics[i].title, `epics[${i}]`);
+  }
+
   for (const issue of issues) {
     const existing = seen.get(issue.title);
     if (existing) {
       errors.push({
         code: "DUPLICATE_TITLE",
-        message: `Duplicate issue title "${issue.title}" at ${existing} and ${issue.path}`,
+        message: `Duplicate title "${issue.title}" at ${existing} and ${issue.path}`,
         path: issue.path,
       });
     } else {
@@ -214,7 +221,7 @@ export function validatePlan(
   checkUndefinedMilestones(plan.epics, milestoneNames, errors);
   checkEpicSizes(plan.epics, errors, warnings);
   checkEstimates(allIssues, warnings);
-  checkDuplicateTitles(allIssues, errors);
+  checkDuplicateTitles(allIssues, plan.epics, errors);
   checkEmptyDescriptions(plan.epics, warnings);
 
   if (preferences?.include_infrastructure) {

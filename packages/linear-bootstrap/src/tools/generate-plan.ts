@@ -105,7 +105,7 @@ export async function generatePlanCore(
       model,
       hasWorkspaceContext: !!workspaceContext,
     },
-    "Generating project plan via OpenRouter",
+    "Generating project plan via LLM API",
   );
 
   let responseText: string;
@@ -120,7 +120,7 @@ export async function generatePlanCore(
             { role: "system", content: systemPrompt },
             { role: "user", content: args.description },
           ],
-          temperature: 0.7,
+          temperature: 0.3,
         }),
     );
 
@@ -138,9 +138,12 @@ export async function generatePlanCore(
     });
   }
 
+  // Strip markdown code fences if present
+  const cleaned = responseText.replace(/^```(?:json)?\s*\n?/i, '').replace(/\n?```\s*$/i, '').trim();
+
   let rawPlan: unknown;
   try {
-    rawPlan = JSON.parse(responseText);
+    rawPlan = JSON.parse(cleaned);
   } catch {
     throw new PlanValidationError("Model returned invalid JSON", {
       raw: responseText.slice(0, 500),

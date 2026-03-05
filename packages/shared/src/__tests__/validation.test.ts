@@ -23,7 +23,8 @@ describe("validation", () => {
       age: z.number().transform(String),
     });
     const input = { age: 25 };
-    const result = validateToolInput(schema, input);
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const result = validateToolInput(schema as z.ZodSchema<any>, input);
     expect(result.success).toBe(true);
     if (result.success) {
       expect(result.data).toEqual({ name: "Anonymous", age: "25" });
@@ -70,7 +71,8 @@ describe("validation", () => {
     expect(result.success).toBe(false);
     if (!result.success) {
       const failure = result as ValidationFailure;
-      const errors = failure.error.details.fieldErrors.name;
+      const fieldErrors = failure.error.details.fieldErrors as Record<string, string[]>;
+      const errors = fieldErrors.name;
       expect(errors).toContain("Too short");
     }
   });

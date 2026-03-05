@@ -66,7 +66,8 @@ describe("addEpic", () => {
     const result = await addEpic(baseArgs, logger);
     assertToolSuccess(result);
 
-    const data = result._meta?.data as Record<string, unknown>;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const data = result._meta?.data as any;
     expect(data.epic_id).toBe("epic-issue-1");
     expect(data.issue_ids).toEqual({
       "Issue A": "issue-a",
@@ -82,7 +83,8 @@ describe("addEpic", () => {
     const result = await addEpic(baseArgs, logger);
     assertToolSuccess(result);
 
-    const data = result._meta?.data as Record<string, unknown>;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const data = result._meta?.data as any;
     expect(data.epic_id).toBe("existing-epic-1");
     expect(data.issue_ids).toEqual({});
     expect(mockCreateIssue).not.toHaveBeenCalled();
@@ -96,7 +98,8 @@ describe("addEpic", () => {
     const result = await addEpic(baseArgs, logger);
     assertToolSuccess(result);
 
-    const data = result._meta?.data as Record<string, unknown>;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const data = result._meta?.data as any;
     expect(data.epic_id).toBe("existing-epic-1");
     expect(data.issue_ids).toEqual({});
     expect(mockCreateIssue).not.toHaveBeenCalled();
@@ -154,7 +157,8 @@ describe("addEpic", () => {
     const result = await addEpic(argsWithDeps, logger);
     assertToolSuccess(result);
 
-    const data = result._meta?.data as Record<string, unknown>;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const data = result._meta?.data as any;
     expect(data.epic_id).toBe("epic-issue-1");
     expect(data.issue_ids).toEqual({
       "Issue A": "issue-a",
