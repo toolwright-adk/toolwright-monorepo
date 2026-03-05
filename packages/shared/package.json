@@ -4,6 +4,22 @@
   "description": "Shared utilities for Toolwright MCP servers",
   "license": "MIT",
   "type": "module",
+  "author": "Toolwright Contributors",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/toolwright-adk/toolwright-monorepo.git",
+    "directory": "packages/shared"
+  },
+  "homepage": "https://github.com/toolwright-adk/toolwright-monorepo/tree/main/packages/shared",
+  "bugs": {
+    "url": "https://github.com/toolwright-adk/toolwright-monorepo/issues"
+  },
+  "keywords": [
+    "mcp",
+    "toolwright",
+    "utilities",
+    "model-context-protocol"
+  ],
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "exports": {
@@ -19,6 +35,9 @@
   "files": [
     "dist"
   ],
+  "publishConfig": {
+    "access": "public"
+  },
   "scripts": {
     "build": "tsup",
     "test": "vitest run",

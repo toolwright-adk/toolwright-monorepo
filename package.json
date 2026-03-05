@@ -13,6 +13,7 @@
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "clean": "pnpm -r clean",
+    "publish:all": "pnpm -r publish --access public",
     "prepare": "husky"
   },
   "engines": {

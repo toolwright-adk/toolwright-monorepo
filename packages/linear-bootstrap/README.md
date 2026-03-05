@@ -30,6 +30,25 @@ Add to your MCP client config (Claude Code, Cursor, Windsurf, etc.):
 {
   "mcpServers": {
     "linear-bootstrap": {
+      "command": "npx",
+      "args": ["-y", "@toolwright-adk/linear-bootstrap"],
+      "env": {
+        "LINEAR_API_KEY": "lin_api_...",
+        "LLM_API_KEY": "...",
+        "LLM_BASE_URL": "https://openrouter.ai/api/v1",
+        "LLM_MODEL": "anthropic/claude-sonnet-4"
+      }
+    }
+  }
+}
+```
+
+Or if you prefer a local checkout:
+
+```json
+{
+  "mcpServers": {
+    "linear-bootstrap": {
       "command": "node",
       "args": ["/path/to/linear-bootstrap/dist/server.js"],
       "env": {
@@ -306,6 +325,34 @@ No credentials are logged or cached to disk. Plan and workspace caches are in-me
 - **Custom fields** — the schema supports them, but the Linear SDK (v37) doesn't expose custom field definitions. The `custom_fields` array is always empty.
 - **No import** — this server creates new Linear projects; it doesn't import from Jira, GitHub Projects, Asana, etc.
 - **LLM quality** — plan quality depends on your model. Larger models (Claude Sonnet, GPT-4o, Llama 3 70B) produce better-structured plans than smaller ones.
+
+## SDK Usage
+
+The package also exports core functions for programmatic use:
+
+```bash
+npm install @toolwright-adk/linear-bootstrap
+```
+
+```typescript
+import { createServer } from "@toolwright-adk/linear-bootstrap";
+// Creates a configured McpServer with all tools registered
+const server = createServer();
+
+// Or use the core functions directly (no MCP overhead)
+import {
+  generatePlanCore,
+  validatePlan,
+  bootstrapProject,
+  introspectWorkspaceCore,
+} from "@toolwright-adk/linear-bootstrap";
+```
+
+The `./server` subpath export gives you the executable entry point (stdio transport included):
+
+```typescript
+import "@toolwright-adk/linear-bootstrap/server";
+```
 
 ## Development
 

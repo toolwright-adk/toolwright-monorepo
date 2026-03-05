@@ -1,0 +1,18 @@
+{
+  "name": "linear-bootstrap-apify-actor",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "tsc",
+    "start": "node dist/main.js"
+  },
+  "dependencies": {
+    "@toolwright-adk/linear-bootstrap": "^0.1.0",
+    "@modelcontextprotocol/sdk": "^1.12.1",
+    "apify": "^3.0.0"
+  },
+  "devDependencies": {
+    "typescript": "^5.5.0"
+  }
+}
