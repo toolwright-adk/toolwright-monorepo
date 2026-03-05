@@ -3,4 +3,9 @@ import { createServer } from "./server.js";
 
 const transport = new StdioServerTransport();
 const server = createServer();
-await server.connect(transport);
+try {
+  await server.connect(transport);
+} catch (err) {
+  console.error("Failed to start MCP server:", err);
+  process.exit(1);
+}

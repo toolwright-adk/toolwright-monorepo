@@ -341,17 +341,11 @@ const server = createServer();
 
 // Or use the core functions directly (no MCP overhead)
 import {
-  generatePlanCore,
+  generatePlan,
   validatePlan,
   bootstrapProject,
-  introspectWorkspaceCore,
+  introspectWorkspace,
 } from "@toolwright-adk/linear-bootstrap";
-```
-
-The `./server` subpath export provides `createServer` directly (without re-exporting the core functions):
-
-```typescript
-import { createServer } from "@toolwright-adk/linear-bootstrap/server";
 ```
 
 ## Development
