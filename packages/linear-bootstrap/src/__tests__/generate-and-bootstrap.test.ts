@@ -94,7 +94,7 @@ describe("generateAndBootstrap", () => {
     );
 
     assertToolSuccess(result);
-    const data = result._meta?.data as any;
+    const data = result._meta?.data as Record<string, unknown>;
     expect(data.plan_id).toBeDefined();
     expect(data.summary).toEqual(validSummary);
     expect(data.validation.valid).toBe(true);
@@ -121,7 +121,7 @@ describe("generateAndBootstrap", () => {
     );
 
     assertToolSuccess(result);
-    const data = result._meta?.data as any;
+    const data = result._meta?.data as Record<string, unknown>;
     expect(data.plan_id).toBeDefined();
     expect(data.summary).toEqual(validSummary);
     expect(data.validation.valid).toBe(true);
@@ -173,7 +173,7 @@ describe("generateAndBootstrap", () => {
     );
 
     assertToolSuccess(result);
-    const data = result._meta?.data as any;
+    const data = result._meta?.data as Record<string, unknown>;
     expect(data.validation.valid).toBe(false);
     expect(data.validation.errors.length).toBeGreaterThan(0);
     expect(data.bootstrap).toBeUndefined();

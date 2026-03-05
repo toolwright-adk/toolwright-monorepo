@@ -88,7 +88,7 @@ describe("generatePlan", () => {
     );
 
     assertToolSuccess(result);
-    const data = result._meta?.data as any;
+    const data = result._meta?.data as Record<string, unknown>;
     expect(data.plan_id).toBeDefined();
     expect(typeof data.plan_id).toBe("string");
     expect(data.summary).toBeDefined();

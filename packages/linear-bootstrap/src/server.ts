@@ -25,9 +25,7 @@ function handleToolError(err: unknown, toolName: string): CallToolResult {
 }
 import {
   GeneratePlanInputSchema,
-  ValidatePlanInputSchema,
   ValidatePlanInputObject,
-  BootstrapProjectInputSchema,
   BootstrapProjectInputObject,
   AddEpicInputSchema,
   GenerateAndBootstrapInputSchema,

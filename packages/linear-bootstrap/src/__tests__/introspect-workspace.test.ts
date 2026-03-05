@@ -79,7 +79,7 @@ describe("introspectWorkspace", () => {
     const result = await introspectWorkspace({ team_id: "team-1" }, logger);
     assertToolSuccess(result);
 
-    const data = result._meta?.data as any;
+    const data = result._meta?.data as Record<string, unknown>;
     expect(data.team_name).toBe("Engineering");
     expect(data.workflow_states).toHaveLength(2);
     expect(data.labels).toHaveLength(2);
@@ -109,7 +109,7 @@ describe("introspectWorkspace", () => {
     const result = await introspectWorkspace({ team_id: "team-1" }, logger);
     assertToolSuccess(result);
 
-    const data = result._meta?.data as any;
+    const data = result._meta?.data as Record<string, unknown>;
     expect(data.team_name).toBe("Cached Team");
 
     // Client should not have been called
@@ -131,7 +131,7 @@ describe("introspectWorkspace", () => {
     const result = await introspectWorkspace({ team_id: "team-2" }, logger);
     assertToolSuccess(result);
 
-    const data = result._meta?.data as any;
+    const data = result._meta?.data as Record<string, unknown>;
     expect(data.cycles_enabled).toBe(false);
     expect(data.active_cycle).toBeUndefined();
     expect(mockGetTeamActiveCycle).not.toHaveBeenCalled();

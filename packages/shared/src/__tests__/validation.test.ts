@@ -2,7 +2,6 @@ import { describe, it, expect } from "vitest";
 import {
   validateToolInput,
   type ValidationFailure,
-  type ValidationResult,
 } from "../validation.js";
 import { ToolInputError } from "../errors.js";
 import { z } from "zod";
