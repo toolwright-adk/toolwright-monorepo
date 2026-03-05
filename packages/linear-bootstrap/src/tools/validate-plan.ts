@@ -203,9 +203,58 @@ function checkEmptyDescriptions(
   }
 }
 
+const SCALE_RANGES: Record<
+  string,
+  {
+    milestones: [number, number];
+    epics: [number, number];
+    issues: [number, number];
+  }
+> = {
+  small: { milestones: [1, 2], epics: [3, 5], issues: [10, 25] },
+  medium: { milestones: [2, 4], epics: [5, 10], issues: [20, 60] },
+  large: { milestones: [4, 6], epics: [10, 20], issues: [50, 120] },
+};
+
+function checkScale(
+  plan: Plan,
+  complexity: string,
+  warnings: ValidationIssue[],
+): void {
+  const range = SCALE_RANGES[complexity];
+  if (!range) return;
+
+  const milestoneCount = plan.milestones.length;
+  const epicCount = plan.epics.length;
+  const issueCount = plan.epics.reduce((n, e) => n + e.issues.length, 0);
+
+  if (
+    milestoneCount < range.milestones[0] ||
+    milestoneCount > range.milestones[1]
+  ) {
+    warnings.push({
+      code: "SCALE_MISMATCH",
+      message: `Plan has ${milestoneCount} milestones but "${complexity}" complexity expects ${range.milestones[0]}-${range.milestones[1]}`,
+    });
+  }
+  if (epicCount < range.epics[0] || epicCount > range.epics[1]) {
+    warnings.push({
+      code: "SCALE_MISMATCH",
+      message: `Plan has ${epicCount} epics but "${complexity}" complexity expects ${range.epics[0]}-${range.epics[1]}`,
+    });
+  }
+  if (issueCount < range.issues[0] || issueCount > range.issues[1]) {
+    warnings.push({
+      code: "SCALE_MISMATCH",
+      message: `Plan has ${issueCount} issues but "${complexity}" complexity expects ${range.issues[0]}-${range.issues[1]}`,
+    });
+  }
+}
+
 export function validatePlan(
   plan: Plan,
   preferences?: GeneratePlanInput["preferences"],
+  complexity?: string,
 ): PlanValidationResult {
   const errors: ValidationIssue[] = [];
   const warnings: ValidationIssue[] = [];
@@ -226,6 +275,10 @@ export function validatePlan(
     checkInfrastructureEpic(plan.epics, warnings);
   }
 
+  if (complexity) {
+    checkScale(plan, complexity, warnings);
+  }
+
   return {
     valid: errors.length === 0,
     errors,
@@ -237,6 +290,6 @@ export function validatePlanTool(
   args: ValidatePlanInput,
 ): ToolSuccess<PlanValidationResult> {
   const plan = resolvePlan(args);
-  const result = validatePlan(plan, args.preferences);
+  const result = validatePlan(plan, args.preferences, args.complexity);
   return success(result);
 }

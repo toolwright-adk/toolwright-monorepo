@@ -124,7 +124,11 @@ export async function bootstrapProject(
     const existingLabelMap = buildExistingLabelMap(workspaceContext);
     const defaultStateId = workspaceContext?.default_state_id;
 
-    // Create labels (non-critical — reuse existing, create new)
+    // Create labels (non-critical — reuse existing, create new).
+    // Label matching is case-insensitive: the existingLabelMap stores keys
+    // lowercased, and we look up via toLowerCase(). The labelIds record stores
+    // the result under the LLM's original casing, which is also used in
+    // issue.labels — so the same casing flows through both paths consistently.
     const uniqueLabels = collectUniqueLabels(plan);
     for (const labelName of uniqueLabels) {
       const existingId = existingLabelMap.get(labelName.toLowerCase());

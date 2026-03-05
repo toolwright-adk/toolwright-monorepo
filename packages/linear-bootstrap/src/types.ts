@@ -1,33 +1,43 @@
 import { z } from "zod";
 
 export const IssueSchema = z.object({
-  title: z.string(),
+  title: z.string().min(1),
   description: z.string().optional(),
-  estimate: z.number().optional(),
+  // Linear uses 0 (none) through 4; we require a priority for generated plans
+  estimate: z.number().int().min(0).optional(),
   labels: z.array(z.string()),
   priority: z.number().min(1).max(4),
   depends_on: z.array(z.string()),
 });
 
 export const EpicSchema = z.object({
-  title: z.string(),
+  title: z.string().min(1),
   description: z.string(),
-  milestone: z.string(),
+  milestone: z.string().min(1),
   issues: z.array(IssueSchema),
 });
 
+// ISO date pattern: YYYY-MM-DD
+const isoDatePattern = /^\d{4}-\d{2}-\d{2}$/;
+
 export const MilestoneSchema = z.object({
-  name: z.string(),
+  name: z.string().min(1),
   description: z.string(),
-  target_date: z.string().optional(),
+  target_date: z
+    .string()
+    .regex(isoDatePattern, "Must be YYYY-MM-DD format")
+    .optional(),
   sort_order: z.number(),
 });
 
 export const PlanSchema = z.object({
   project: z.object({
-    name: z.string(),
+    name: z.string().min(1),
     description: z.string(),
-    target_date: z.string().optional(),
+    target_date: z
+      .string()
+      .regex(isoDatePattern, "Must be YYYY-MM-DD format")
+      .optional(),
   }),
   milestones: z.array(MilestoneSchema),
   epics: z.array(EpicSchema),
@@ -48,8 +58,8 @@ export const ProjectTypeEnum = z.enum([
 ]);
 
 export const GeneratePlanInputSchema = z.object({
-  description: z.string(),
-  team_id: z.string(),
+  description: z.string().min(1).max(10000),
+  team_id: z.string().min(1),
   complexity: z.enum(["small", "medium", "large"]).default("medium"),
   project_type: ProjectTypeEnum.default("feature"),
   preferences: z
@@ -84,8 +94,9 @@ export const PlanValidationResultSchema = z.object({
 
 export const ValidatePlanInputObject = z.object({
   plan: PlanSchema.optional(),
-  plan_id: z.string().optional(),
+  plan_id: z.string().min(1).optional(),
   preferences: GeneratePlanInputSchema.shape.preferences,
+  complexity: z.enum(["small", "medium", "large"]).optional(),
 });
 export const ValidatePlanInputSchema = ValidatePlanInputObject.refine(
   (data) => data.plan !== undefined || data.plan_id !== undefined,
@@ -94,8 +105,8 @@ export const ValidatePlanInputSchema = ValidatePlanInputObject.refine(
 
 export const BootstrapProjectInputObject = z.object({
   plan: PlanSchema.optional(),
-  plan_id: z.string().optional(),
-  team_id: z.string(),
+  plan_id: z.string().min(1).optional(),
+  team_id: z.string().min(1),
   dry_run: z.boolean().default(false),
 });
 export const BootstrapProjectInputSchema = BootstrapProjectInputObject.refine(
@@ -117,8 +128,8 @@ export const BootstrapResultSchema = z.object({
 });
 
 export const AddEpicInputSchema = z.object({
-  project_id: z.string(),
-  team_id: z.string(),
+  project_id: z.string().min(1),
+  team_id: z.string().min(1),
   epic: EpicSchema,
   milestone_id: z.string().optional(),
   label_ids: z.record(z.string(), z.string()).optional(),
@@ -175,7 +186,7 @@ export const WorkspaceContextSchema = z.object({
 });
 
 export const IntrospectWorkspaceInputSchema = z.object({
-  team_id: z.string(),
+  team_id: z.string().min(1),
 });
 
 export const ListTeamsInputSchema = z.object({});

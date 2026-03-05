@@ -9,6 +9,39 @@ import {
 
 const MAX_RETRIES = 3;
 const BASE_DELAY_MS = 1000;
+const DEFAULT_PAGE_SIZE = 100;
+
+interface PageInfo {
+  hasNextPage: boolean;
+  endCursor?: string;
+}
+
+interface Connection<T> {
+  nodes: T[];
+  pageInfo: PageInfo;
+}
+
+/**
+ * Paginate through all pages of a Linear SDK connection query.
+ * The `fetchPage` callback receives an optional `after` cursor and
+ * should return the raw connection object.
+ */
+async function fetchAllPages<T>(
+  fetchPage: (after?: string) => Promise<Connection<T>>,
+): Promise<T[]> {
+  const all: T[] = [];
+  let cursor: string | undefined;
+
+   
+  while (true) {
+    const page = await fetchPage(cursor);
+    all.push(...page.nodes);
+    if (!page.pageInfo.hasNextPage || !page.pageInfo.endCursor) break;
+    cursor = page.pageInfo.endCursor;
+  }
+
+  return all;
+}
 
 function sleep(ms: number): Promise<void> {
   return new Promise((resolve) => setTimeout(resolve, ms));
@@ -261,8 +294,10 @@ export class LinearApiClient {
         "getTeamWorkflowStates",
         async () => {
           const team = await this.client.team(teamId);
-          const connection = await team.states({ first: 100 });
-          return connection.nodes.map((s) => ({
+          const nodes = await fetchAllPages((after) =>
+            team.states({ first: DEFAULT_PAGE_SIZE, after }),
+          );
+          return nodes.map((s) => ({
             id: s.id,
             name: s.name,
             type: s.type,
@@ -282,13 +317,15 @@ export class LinearApiClient {
         "getTeamLabels",
         async () => {
           const team = await this.client.team(teamId);
-          const connection = await team.labels({ first: 100 });
+          const nodes = await fetchAllPages((after) =>
+            team.labels({ first: DEFAULT_PAGE_SIZE, after }),
+          );
           const results: {
             id: string;
             name: string;
             parent_name?: string;
           }[] = [];
-          for (const label of connection.nodes) {
+          for (const label of nodes) {
             const parent = await label.parent;
             results.push({
               id: label.id,
@@ -377,13 +414,17 @@ export class LinearApiClient {
         withRetry(
           "getTeamProjects",
           async () => {
-            const connection = await this.client.projects({
-              filter: {
-                accessibleTeams: { id: { eq: teamId } },
-              },
-              first: 100,
-            });
-            return connection.nodes.map((p) => ({
+            const filter = {
+              accessibleTeams: { id: { eq: teamId } },
+            };
+            const nodes = await fetchAllPages((after) =>
+              this.client.projects({
+                filter,
+                first: DEFAULT_PAGE_SIZE,
+                after,
+              }),
+            );
+            return nodes.map((p) => ({
               id: p.id,
               name: p.name,
               state: p.state,
@@ -400,8 +441,10 @@ export class LinearApiClient {
       withRetry(
         "listTeams",
         async () => {
-          const connection = await this.client.teams({ first: 100 });
-          return connection.nodes.map((t) => ({
+          const nodes = await fetchAllPages((after) =>
+            this.client.teams({ first: DEFAULT_PAGE_SIZE, after }),
+          );
+          return nodes.map((t) => ({
             id: t.id,
             name: t.name,
             key: t.key,
@@ -431,18 +474,25 @@ export class LinearApiClient {
 
   async getProjectIssues(
     projectId: string,
+    options?: { topLevelOnly?: boolean },
   ): Promise<{ id: string; title: string }[]> {
+    const filter: Record<string, unknown> = {
+      project: { id: { eq: projectId } },
+    };
+    // Filter to parentless issues only (epics) when requested
+    if (options?.topLevelOnly) {
+      filter.parent = { null: true };
+    }
     const { result: issues } = await withTiming(
       "linear-get-project-issues",
       () =>
         withRetry(
           "getProjectIssues",
           async () => {
-            const connection = await this.client.issues({
-              filter: { project: { id: { eq: projectId } } },
-              first: 250,
-            });
-            return connection.nodes.map((i) => ({ id: i.id, title: i.title }));
+            const nodes = await fetchAllPages((after) =>
+              this.client.issues({ filter, first: DEFAULT_PAGE_SIZE, after }),
+            );
+            return nodes.map((i) => ({ id: i.id, title: i.title }));
           },
           this.logger,
         ),

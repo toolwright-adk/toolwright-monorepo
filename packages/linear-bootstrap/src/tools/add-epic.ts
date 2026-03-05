@@ -22,8 +22,12 @@ export async function addEpic(
   const { project_id, team_id, epic, milestone_id, label_ids } = args;
   const client = new LinearApiClient(logger);
 
-  // Idempotency check: skip if epic with same title already exists in project
-  const existingIssues = await client.getProjectIssues(project_id);
+  // Idempotency check: skip if a top-level issue (epic) with same title exists.
+  // Only check parentless issues — a child issue sharing the epic's title
+  // should not block creation.
+  const existingIssues = await client.getProjectIssues(project_id, {
+    topLevelOnly: true,
+  });
   const existingEpic = existingIssues.find(
     (i) => i.title.toLowerCase() === epic.title.toLowerCase(),
   );

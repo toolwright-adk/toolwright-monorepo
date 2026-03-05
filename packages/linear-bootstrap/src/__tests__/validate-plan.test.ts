@@ -301,4 +301,50 @@ describe("validatePlan", () => {
       result.warnings.some((w) => w.code === "NO_INFRASTRUCTURE_EPIC"),
     ).toBe(false);
   });
+
+  it("warns when plan is too small for requested complexity", () => {
+    // Default plan has 1 milestone, 1 epic, 2 issues — too small for "large"
+    const result = validatePlan(makePlan(), undefined, "large");
+    expect(result.valid).toBe(true);
+    const scaleWarnings = result.warnings.filter(
+      (w) => w.code === "SCALE_MISMATCH",
+    );
+    expect(scaleWarnings.length).toBeGreaterThan(0);
+    expect(scaleWarnings.some((w) => w.message.includes("milestones"))).toBe(
+      true,
+    );
+    expect(scaleWarnings.some((w) => w.message.includes("epics"))).toBe(true);
+    expect(scaleWarnings.some((w) => w.message.includes("issues"))).toBe(true);
+  });
+
+  it("does not warn when plan matches requested complexity", () => {
+    // 1 milestone, 1 epic with 2 issues — doesn't match "small" either (needs 3-5 epics)
+    // Build a plan that fits "small": 1 milestone, 3 epics, 10 issues
+    const smallPlan = makePlan({
+      milestones: [{ name: "M1", description: "desc", sort_order: 0 }],
+      epics: Array.from({ length: 3 }, (_, i) => ({
+        title: `Epic ${i + 1}`,
+        description: `desc ${i + 1}`,
+        milestone: "M1",
+        issues: Array.from({ length: 4 }, (_, j) => ({
+          title: `E${i + 1} Task ${j + 1}`,
+          labels: [],
+          priority: 2 as const,
+          depends_on: [],
+        })),
+      })),
+    });
+    const result = validatePlan(smallPlan, undefined, "small");
+    expect(result.valid).toBe(true);
+    expect(
+      result.warnings.filter((w) => w.code === "SCALE_MISMATCH"),
+    ).toHaveLength(0);
+  });
+
+  it("does not warn about scale when complexity is not provided", () => {
+    const result = validatePlan(makePlan());
+    expect(
+      result.warnings.filter((w) => w.code === "SCALE_MISMATCH"),
+    ).toHaveLength(0);
+  });
 });

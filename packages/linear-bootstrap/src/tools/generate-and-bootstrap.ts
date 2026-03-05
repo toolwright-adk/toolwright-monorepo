@@ -38,22 +38,19 @@ export async function generateAndBootstrap(
   const planId = storePlan(plan);
 
   // Step 2: Validate
-  const validation = validatePlan(plan, args.preferences);
+  const validation = validatePlan(plan, args.preferences, args.complexity);
 
   if (!validation.valid || args.dry_run) {
     return success({ plan_id: planId, summary, validation });
   }
 
-  // Step 3: Bootstrap
+  // Step 3: Bootstrap — validation already passed above, so bootstrapProject
+  // will always return BootstrapResult (not PlanValidationResult).
   const bootstrapResult = await bootstrapProject(
     { plan, team_id: args.team_id, dry_run: false },
     logger,
   );
-  const bootstrapData = bootstrapResult._meta!.data;
-  const bootstrap =
-    "project_id" in bootstrapData
-      ? (bootstrapData as BootstrapResult)
-      : undefined;
+  const bootstrap = bootstrapResult._meta?.data as BootstrapResult | undefined;
 
   return success({ plan_id: planId, summary, validation, bootstrap });
 }
