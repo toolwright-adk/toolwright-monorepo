@@ -136,11 +136,9 @@ export async function generatePlanCore(
     });
   }
 
-  // Strip markdown code fences if present
-  const cleaned = responseText
-    .replace(/^```(?:json)?\s*\n?/i, "")
-    .replace(/\n?```\s*$/i, "")
-    .trim();
+  // Extract JSON from code fences anywhere in the response (handles preamble text)
+  const fenceMatch = responseText.match(/```json?\s*\n([\s\S]*?)\n```/);
+  const cleaned = (fenceMatch ? fenceMatch[1] : responseText).trim();
 
   let rawPlan: unknown;
   try {

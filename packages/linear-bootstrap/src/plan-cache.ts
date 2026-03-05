@@ -4,12 +4,21 @@ import type { Plan } from "./types.js";
 
 const cache = new Map<string, { plan: Plan; expiresAt: number }>();
 const TTL_MS = 30 * 60 * 1000; // 30 minutes
+const MAX_ENTRIES = 50;
 
 export function storePlan(plan: Plan): string {
-  // Evict expired entries opportunistically
   const now = Date.now();
+
+  // Evict expired entries first
   for (const [id, entry] of cache) {
     if (now > entry.expiresAt) cache.delete(id);
+  }
+
+  // If still at capacity, evict the oldest entry
+  while (cache.size >= MAX_ENTRIES) {
+    const oldest = cache.keys().next().value;
+    if (oldest) cache.delete(oldest);
+    else break;
   }
 
   const id = randomUUID();

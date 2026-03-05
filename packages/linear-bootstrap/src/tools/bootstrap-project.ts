@@ -18,6 +18,11 @@ import {
   type WorkspaceContext,
 } from "../types.js";
 
+/**
+ * Build a lowercase-name → ID map of existing team labels for reuse.
+ * Keyed by lowercase name only (not parent/name) because Linear enforces
+ * label name uniqueness per team regardless of parent group.
+ */
 export function buildExistingLabelMap(
   context: WorkspaceContext | undefined,
 ): Map<string, string> {
@@ -41,6 +46,14 @@ function collectUniqueLabels(plan: Plan): string[] {
   return [...labels].sort();
 }
 
+/**
+ * Create a full Linear project from a validated plan.
+ *
+ * Label reuse and default workflow state injection depend on a warmed
+ * workspace cache (populated by generate-plan's auto-introspection or a
+ * prior introspect-workspace call). When called directly with a cold cache,
+ * new labels will be created instead of reusing existing ones.
+ */
 export async function bootstrapProject(
   args: BootstrapProjectInput,
   logger: Logger,

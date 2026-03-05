@@ -167,23 +167,36 @@ function checkDuplicateTitles(
   epics: Plan["epics"],
   errors: ValidationIssue[],
 ): void {
-  const seen = new Map<string, string>();
+  // Case-insensitive: keys are lowercased, values track original title + path
+  const seen = new Map<string, { title: string; path: string }>();
 
-  // Register epic titles first so collisions with issue titles are caught
+  // Register epic titles first so epic-vs-epic and epic-vs-issue collisions are caught
   for (let i = 0; i < epics.length; i++) {
-    seen.set(epics[i].title, `epics[${i}]`);
-  }
-
-  for (const issue of issues) {
-    const existing = seen.get(issue.title);
+    const key = epics[i].title.toLowerCase();
+    const path = `epics[${i}]`;
+    const existing = seen.get(key);
     if (existing) {
       errors.push({
         code: "DUPLICATE_TITLE",
-        message: `Duplicate title "${issue.title}" at ${existing} and ${issue.path}`,
+        message: `Duplicate title "${epics[i].title}" at ${existing.path} and ${path}`,
+        path,
+      });
+    } else {
+      seen.set(key, { title: epics[i].title, path });
+    }
+  }
+
+  for (const issue of issues) {
+    const key = issue.title.toLowerCase();
+    const existing = seen.get(key);
+    if (existing) {
+      errors.push({
+        code: "DUPLICATE_TITLE",
+        message: `Duplicate title "${issue.title}" at ${existing.path} and ${issue.path}`,
         path: issue.path,
       });
     } else {
-      seen.set(issue.title, issue.path);
+      seen.set(key, { title: issue.title, path: issue.path });
     }
   }
 }

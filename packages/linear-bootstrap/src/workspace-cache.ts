@@ -5,6 +5,7 @@ const cache = new Map<
   { context: WorkspaceContext; expiresAt: number }
 >();
 const TTL_MS = 30 * 60 * 1000; // 30 minutes
+const MAX_ENTRIES = 20;
 
 export function storeWorkspaceContext(
   teamId: string,
@@ -14,6 +15,14 @@ export function storeWorkspaceContext(
   for (const [id, entry] of cache) {
     if (now > entry.expiresAt) cache.delete(id);
   }
+
+  // If still at capacity, evict the oldest entry
+  while (cache.size >= MAX_ENTRIES) {
+    const oldest = cache.keys().next().value;
+    if (oldest) cache.delete(oldest);
+    else break;
+  }
+
   cache.set(teamId, { context, expiresAt: now + TTL_MS });
 }
 

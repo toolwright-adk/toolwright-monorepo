@@ -260,6 +260,33 @@ describe("validatePlan", () => {
     expect(result.errors.some((e) => e.code === "DUPLICATE_TITLE")).toBe(true);
   });
 
+  it("detects duplicate epic titles (case-insensitive)", () => {
+    const plan = makePlan({
+      epics: [
+        {
+          title: "Auth System",
+          description: "desc",
+          milestone: "M1",
+          issues: [
+            { title: "Task A", labels: [], priority: 2, depends_on: [] },
+          ],
+        },
+        {
+          title: "auth system",
+          description: "desc",
+          milestone: "M1",
+          issues: [
+            { title: "Task B", labels: [], priority: 2, depends_on: [] },
+          ],
+        },
+      ],
+    });
+    const result = validatePlan(plan);
+    expect(result.valid).toBe(false);
+    expect(result.errors.some((e) => e.code === "DUPLICATE_TITLE")).toBe(true);
+    expect(result.errors[0].message).toContain("auth system");
+  });
+
   it("warns on empty epic descriptions", () => {
     const plan = makePlan({
       epics: [

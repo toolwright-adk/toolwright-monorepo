@@ -27,7 +27,7 @@ export const MilestoneSchema = z.object({
     .string()
     .regex(isoDatePattern, "Must be YYYY-MM-DD format")
     .optional(),
-  sort_order: z.number(),
+  sort_order: z.number().int().min(0),
 });
 
 export const PlanSchema = z.object({

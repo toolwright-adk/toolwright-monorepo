@@ -149,6 +149,29 @@ describe("generatePlan", () => {
     ).rejects.toThrow(PlanValidationError);
   });
 
+  it("extracts JSON from code fence with preamble text", async () => {
+    const wrappedResponse = `Here's the plan:\n\`\`\`json\n${JSON.stringify(validPlan)}\n\`\`\`\nLet me know if you need changes.`;
+    mockCreate.mockResolvedValue({
+      choices: [{ message: { content: wrappedResponse } }],
+    });
+
+    const result = await generatePlan(
+      {
+        description: "Build a test project",
+        team_id: "team-1",
+        complexity: "medium",
+        project_type: "feature",
+      },
+      logger,
+    );
+
+    assertToolSuccess(result);
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const data = result._meta?.data as any;
+    expect(data.plan_id).toBeDefined();
+    expect(data.summary.total_issues).toBe(1);
+  });
+
   it("throws PlanValidationError for wrong schema shape", async () => {
     mockCreate.mockResolvedValue({
       choices: [
