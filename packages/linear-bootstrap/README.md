@@ -45,13 +45,16 @@ Add to your MCP client config (Claude Code, Cursor, Windsurf, etc.):
 
 ### 2. Install the Agent Skill (optional)
 
-Install the included [Agent Skill](https://agentskills.io) to get a `/linear-bootstrap` slash command:
+Install the included [Agent Skill](https://agentskills.io) to get a `/linear-bootstrap` slash command. The skill file is at `.claude/skills/linear-bootstrap/SKILL.md` — copy it to wherever your agent looks for skills:
 
 ```bash
+# Claude Code
 cp -r /path/to/linear-bootstrap/.claude/skills/linear-bootstrap .claude/skills/
+
+# Other agents — copy the SKILL.md to your agent's skill/command directory
 ```
 
-The skill works with any agent that supports the Agent Skills format (Claude Code, Cursor, Copilot, OpenClaw, etc.). It's tool-agnostic — it describes *what* needs to happen (find team, generate plan, validate, create), not which specific tool to call. Any agent with the MCP server connected will have the right tools available.
+The skill works with any agent that supports the Agent Skills format. It's tool-agnostic — it describes *what* needs to happen (find team, generate plan, validate, create), not which specific tool to call. Any agent with the MCP server connected will have the right tools available.
 
 ### 3. Use it
 

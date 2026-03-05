@@ -2,9 +2,9 @@
 name: linear-bootstrap
 description: |
   Create a complete Linear project from a natural-language description. Use this skill when the user
-  wants to set up a new Linear project, scaffold project milestones and issues, bootstrap a project
-  plan, or create a structured project from a description. Also use when the user mentions creating
-  epics, milestones, or issue hierarchies in Linear.
+  wants to plan a project, set up a project in Linear, scaffold project milestones and issues,
+  bootstrap a project plan, or create a structured project from a description. Also use when the
+  user mentions creating epics, milestones, or issue hierarchies in Linear.
 license: MIT
 metadata:
   author: toolwright-adk
@@ -21,6 +21,8 @@ Create a fully structured Linear project — milestones, epics, issues, labels, 
 ### 1. Identify the team
 
 List the available Linear teams. If there is only one, use it. If there are multiple, ask the user which team to target.
+
+The server automatically reads your team's existing labels, workflow states, and active projects before generating a plan. No extra step needed.
 
 ### 2. Gather the project description
 
