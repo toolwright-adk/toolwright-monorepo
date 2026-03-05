@@ -45,7 +45,7 @@ Determine the **complexity**:
 
 Generate a project plan using the description, team, project type, and complexity. You will receive a plan reference and a summary with counts of milestones, epics, issues, and estimated points.
 
-Show the user the summary. Ask: *"Does this look right, or should I adjust the scope?"*
+Show the user the summary. Ask: _"Does this look right, or should I adjust the scope?"_
 
 ### 4. Validate the plan
 

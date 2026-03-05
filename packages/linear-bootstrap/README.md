@@ -54,7 +54,7 @@ cp -r /path/to/linear-bootstrap/.claude/skills/linear-bootstrap .claude/skills/
 # Other agents — copy the SKILL.md to your agent's skill/command directory
 ```
 
-The skill works with any agent that supports the Agent Skills format. It's tool-agnostic — it describes *what* needs to happen (find team, generate plan, validate, create), not which specific tool to call. Any agent with the MCP server connected will have the right tools available.
+The skill works with any agent that supports the Agent Skills format. It's tool-agnostic — it describes _what_ needs to happen (find team, generate plan, validate, create), not which specific tool to call. Any agent with the MCP server connected will have the right tools available.
 
 ### 3. Use it
 
@@ -64,7 +64,7 @@ The skill works with any agent that supports the Agent Skills format. It's tool-
 
 The skill walks you through team selection, plan review, and project creation interactively. Say "just do it" to skip the review step.
 
-The skill is optional — you can also direct your agent to use the tools directly or according to your own agent guidelines. For example: *"Bootstrap a Linear project for building a Slack integration."*
+The skill is optional — you can also direct your agent to use the tools directly or according to your own agent guidelines. For example: _"Bootstrap a Linear project for building a Slack integration."_
 
 ## Examples
 
@@ -147,30 +147,30 @@ The plan generation is context-aware — it introspects your team's workspace fi
 
 The `project_type` parameter tailors the plan structure:
 
-| Type | When to use | Example milestones |
-|------|------------|-------------------|
-| `feature` (default) | New user-facing functionality | Spec & design → MVP behind flag → Public launch |
-| `infrastructure` | Internal tooling, platform work | Prototype → Dogfood → Org-wide rollout |
-| `api` | Public or internal API development | API design sign-off → Implementation → GA |
-| `migration` | Moving between systems | Dual-write → Backfill → Cutover → Decommission |
+| Type                | When to use                        | Example milestones                              |
+| ------------------- | ---------------------------------- | ----------------------------------------------- |
+| `feature` (default) | New user-facing functionality      | Spec & design → MVP behind flag → Public launch |
+| `infrastructure`    | Internal tooling, platform work    | Prototype → Dogfood → Org-wide rollout          |
+| `api`               | Public or internal API development | API design sign-off → Implementation → GA       |
+| `migration`         | Moving between systems             | Dual-write → Backfill → Cutover → Decommission  |
 
 ## Environment Variables
 
-| Variable | Required | Description |
-|----------|----------|-------------|
-| `LINEAR_API_KEY` | Yes | Linear API key ([create one here](https://linear.app/settings/api)) |
-| `LLM_API_KEY` | Yes | API key for an OpenAI-compatible provider |
-| `LLM_BASE_URL` | Yes | Provider's base URL |
-| `LLM_MODEL` | Yes | Model ID for your provider |
+| Variable         | Required | Description                                                         |
+| ---------------- | -------- | ------------------------------------------------------------------- |
+| `LINEAR_API_KEY` | Yes      | Linear API key ([create one here](https://linear.app/settings/api)) |
+| `LLM_API_KEY`    | Yes      | API key for an OpenAI-compatible provider                           |
+| `LLM_BASE_URL`   | Yes      | Provider's base URL                                                 |
+| `LLM_MODEL`      | Yes      | Model ID for your provider                                          |
 
 Any provider that uses the [OpenAI chat completions API](https://platform.openai.com/docs/api-reference/chat) works. Common setups:
 
-| Provider | `LLM_BASE_URL` | `LLM_MODEL` example |
-|----------|----------------|---------------------|
-| OpenRouter | `https://openrouter.ai/api/v1` | `anthropic/claude-sonnet-4` |
-| Together | `https://api.together.xyz/v1` | `meta-llama/Llama-3-70b-chat-hf` |
-| OpenAI | `https://api.openai.com/v1` | `gpt-4o` |
-| Ollama (local) | `http://localhost:11434/v1` | `llama3` |
+| Provider       | `LLM_BASE_URL`                 | `LLM_MODEL` example              |
+| -------------- | ------------------------------ | -------------------------------- |
+| OpenRouter     | `https://openrouter.ai/api/v1` | `anthropic/claude-sonnet-4`      |
+| Together       | `https://api.together.xyz/v1`  | `meta-llama/Llama-3-70b-chat-hf` |
+| OpenAI         | `https://api.openai.com/v1`    | `gpt-4o`                         |
+| Ollama (local) | `http://localhost:11434/v1`    | `llama3`                         |
 
 ## Tools
 
@@ -198,16 +198,16 @@ If `LINEAR_API_KEY` is set and workspace context isn't already cached, this tool
 
 **Input:**
 
-| Field | Type | Required | Default |
-|-------|------|----------|---------|
-| `description` | string | yes | |
-| `team_id` | string | yes | |
-| `complexity` | `"small"` \| `"medium"` \| `"large"` | no | `"medium"` |
-| `project_type` | `"feature"` \| `"infrastructure"` \| `"api"` \| `"migration"` | no | `"feature"` |
-| `preferences.milestone_style` | `"time-based"` \| `"deliverable-based"` \| `"hybrid"` | no | |
-| `preferences.issue_detail_level` | `"titles-only"` \| `"with-descriptions"` \| `"full-acceptance-criteria"` | no | |
-| `preferences.include_infrastructure` | boolean | no | |
-| `preferences.include_docs` | boolean | no | |
+| Field                                | Type                                                                     | Required | Default     |
+| ------------------------------------ | ------------------------------------------------------------------------ | -------- | ----------- |
+| `description`                        | string                                                                   | yes      |             |
+| `team_id`                            | string                                                                   | yes      |             |
+| `complexity`                         | `"small"` \| `"medium"` \| `"large"`                                     | no       | `"medium"`  |
+| `project_type`                       | `"feature"` \| `"infrastructure"` \| `"api"` \| `"migration"`            | no       | `"feature"` |
+| `preferences.milestone_style`        | `"time-based"` \| `"deliverable-based"` \| `"hybrid"`                    | no       |             |
+| `preferences.issue_detail_level`     | `"titles-only"` \| `"with-descriptions"` \| `"full-acceptance-criteria"` | no       |             |
+| `preferences.include_infrastructure` | boolean                                                                  | no       |             |
+| `preferences.include_docs`           | boolean                                                                  | no       |             |
 
 **Returns:** `{ plan_id, summary }` — summary has `total_issues`, `total_epics`, `total_milestones`, `estimated_points`
 **API calls:** 1 LLM call (chat completion via `LLM_BASE_URL`/`LLM_MODEL`) + 0–6 Linear reads (auto-introspect, skipped if cached)
@@ -228,15 +228,16 @@ Create a complete Linear project from a plan. Validates the plan first; if valid
 
 **Input:**
 
-| Field | Type | Required | Default |
-|-------|------|----------|---------|
-| `plan_id` | string | one of plan_id/plan | |
-| `plan` | Plan | one of plan_id/plan | |
-| `team_id` | string | yes | |
-| `dry_run` | boolean | no | `false` |
+| Field     | Type    | Required            | Default |
+| --------- | ------- | ------------------- | ------- |
+| `plan_id` | string  | one of plan_id/plan |         |
+| `plan`    | Plan    | one of plan_id/plan |         |
+| `team_id` | string  | yes                 |         |
+| `dry_run` | boolean | no                  | `false` |
 
 **Returns:** `{ project_id, milestone_ids, label_ids, epic_ids, issue_ids, dependency_count }`
 **API calls:** 1 Linear read (project name check for idempotency) + N Linear writes, specifically:
+
 - 1 `createProject`
 - 1 `createProjectMilestone` per milestone
 - 0–N `createIssueLabel` (only for labels not already on the team)

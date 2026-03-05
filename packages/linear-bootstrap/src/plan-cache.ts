@@ -27,10 +27,7 @@ export function retrievePlan(id: string): Plan | undefined {
   return entry.plan;
 }
 
-export function resolvePlan(args: {
-  plan?: Plan;
-  plan_id?: string;
-}): Plan {
+export function resolvePlan(args: { plan?: Plan; plan_id?: string }): Plan {
   if (args.plan) return args.plan;
   if (args.plan_id) {
     const plan = retrievePlan(args.plan_id);

@@ -21,7 +21,6 @@ import { retrieveWorkspaceContext } from "../workspace-cache.js";
 import { introspectWorkspaceCore } from "./introspect-workspace.js";
 import { buildSystemPrompt } from "../planning/prompts.js";
 
-
 function computeSummary(plan: Plan): PlanSummary {
   let totalIssues = 0;
   let estimatedPoints = 0;
@@ -111,17 +110,15 @@ export async function generatePlanCore(
   let responseText: string;
 
   try {
-    const { result: completion } = await withTiming(
-      "llm-generate-plan",
-      () =>
-        client.chat.completions.create({
-          model,
-          messages: [
-            { role: "system", content: systemPrompt },
-            { role: "user", content: args.description },
-          ],
-          temperature: 0.3,
-        }),
+    const { result: completion } = await withTiming("llm-generate-plan", () =>
+      client.chat.completions.create({
+        model,
+        messages: [
+          { role: "system", content: systemPrompt },
+          { role: "user", content: args.description },
+        ],
+        temperature: 0.3,
+      }),
     );
 
     responseText = completion.choices[0]?.message?.content ?? "";
@@ -139,7 +136,10 @@ export async function generatePlanCore(
   }
 
   // Strip markdown code fences if present
-  const cleaned = responseText.replace(/^```(?:json)?\s*\n?/i, '').replace(/\n?```\s*$/i, '').trim();
+  const cleaned = responseText
+    .replace(/^```(?:json)?\s*\n?/i, "")
+    .replace(/\n?```\s*$/i, "")
+    .trim();
 
   let rawPlan: unknown;
   try {

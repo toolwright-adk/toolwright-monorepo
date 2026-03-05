@@ -57,15 +57,11 @@ describe("plan-cache", () => {
   });
 
   it("resolvePlan throws for expired/missing plan_id", () => {
-    expect(() => resolvePlan({ plan_id: "gone" })).toThrow(
-      /Plan not found/,
-    );
+    expect(() => resolvePlan({ plan_id: "gone" })).toThrow(/Plan not found/);
   });
 
   it("resolvePlan throws when neither plan nor plan_id provided", () => {
-    expect(() => resolvePlan({})).toThrow(
-      /Either plan or plan_id is required/,
-    );
+    expect(() => resolvePlan({})).toThrow(/Either plan or plan_id is required/);
   });
 
   it("prefers inline plan over plan_id", () => {

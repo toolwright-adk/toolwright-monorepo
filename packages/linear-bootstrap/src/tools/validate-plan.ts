@@ -152,9 +152,7 @@ function checkInfrastructureEpic(
   epics: Plan["epics"],
   warnings: ValidationIssue[],
 ): void {
-  const hasInfra = epics.some((e) =>
-    e.title.toLowerCase().includes("infra"),
-  );
+  const hasInfra = epics.some((e) => e.title.toLowerCase().includes("infra"));
   if (!hasInfra) {
     warnings.push({
       code: "NO_INFRASTRUCTURE_EPIC",

@@ -1,8 +1,5 @@
 import { describe, it, expect } from "vitest";
-import {
-  validateToolInput,
-  type ValidationFailure,
-} from "../validation.js";
+import { validateToolInput, type ValidationFailure } from "../validation.js";
 import { ToolInputError } from "../errors.js";
 import { z } from "zod";
 
@@ -71,7 +68,10 @@ describe("validation", () => {
     expect(result.success).toBe(false);
     if (!result.success) {
       const failure = result as ValidationFailure;
-      const fieldErrors = failure.error.details.fieldErrors as Record<string, string[]>;
+      const fieldErrors = failure.error.details.fieldErrors as Record<
+        string,
+        string[]
+      >;
       const errors = fieldErrors.name;
       expect(errors).toContain("Too short");
     }

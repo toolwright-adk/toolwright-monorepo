@@ -5,9 +5,7 @@ import type { Plan } from "../types.js";
 function makePlan(overrides?: Partial<Plan>): Plan {
   return {
     project: { name: "Test Project", description: "A test project" },
-    milestones: [
-      { name: "M1", description: "First milestone", sort_order: 0 },
-    ],
+    milestones: [{ name: "M1", description: "First milestone", sort_order: 0 }],
     epics: [
       {
         title: "Epic 1",
@@ -107,9 +105,9 @@ describe("validatePlan", () => {
     });
     const result = validatePlan(plan);
     expect(result.valid).toBe(false);
-    expect(
-      result.errors.some((e) => e.code === "CIRCULAR_DEPENDENCY"),
-    ).toBe(true);
+    expect(result.errors.some((e) => e.code === "CIRCULAR_DEPENDENCY")).toBe(
+      true,
+    );
   });
 
   it("detects orphaned depends_on references", () => {
@@ -132,9 +130,9 @@ describe("validatePlan", () => {
     });
     const result = validatePlan(plan);
     expect(result.valid).toBe(false);
-    expect(
-      result.errors.some((e) => e.code === "ORPHANED_DEPENDENCY"),
-    ).toBe(true);
+    expect(result.errors.some((e) => e.code === "ORPHANED_DEPENDENCY")).toBe(
+      true,
+    );
     expect(result.errors[0].message).toContain("Nonexistent Task");
   });
 
@@ -158,9 +156,9 @@ describe("validatePlan", () => {
     });
     const result = validatePlan(plan);
     expect(result.valid).toBe(false);
-    expect(
-      result.errors.some((e) => e.code === "UNDEFINED_MILESTONE"),
-    ).toBe(true);
+    expect(result.errors.some((e) => e.code === "UNDEFINED_MILESTONE")).toBe(
+      true,
+    );
     expect(result.errors[0].message).toContain("NonexistentMilestone");
   });
 
@@ -199,9 +197,7 @@ describe("validatePlan", () => {
     });
     const result = validatePlan(plan);
     expect(result.valid).toBe(true);
-    expect(result.warnings.some((w) => w.code === "LARGE_EPIC")).toBe(
-      true,
-    );
+    expect(result.warnings.some((w) => w.code === "LARGE_EPIC")).toBe(true);
   });
 
   it("warns on high estimates (>5)", () => {
@@ -225,9 +221,7 @@ describe("validatePlan", () => {
     });
     const result = validatePlan(plan);
     expect(result.valid).toBe(true);
-    expect(
-      result.warnings.some((w) => w.code === "HIGH_ESTIMATE"),
-    ).toBe(true);
+    expect(result.warnings.some((w) => w.code === "HIGH_ESTIMATE")).toBe(true);
   });
 
   it("detects duplicate issue titles across epics", () => {
@@ -263,9 +257,7 @@ describe("validatePlan", () => {
     });
     const result = validatePlan(plan);
     expect(result.valid).toBe(false);
-    expect(
-      result.errors.some((e) => e.code === "DUPLICATE_TITLE"),
-    ).toBe(true);
+    expect(result.errors.some((e) => e.code === "DUPLICATE_TITLE")).toBe(true);
   });
 
   it("warns on empty epic descriptions", () => {
@@ -288,9 +280,9 @@ describe("validatePlan", () => {
     });
     const result = validatePlan(plan);
     expect(result.valid).toBe(true);
-    expect(
-      result.warnings.some((w) => w.code === "EMPTY_DESCRIPTION"),
-    ).toBe(true);
+    expect(result.warnings.some((w) => w.code === "EMPTY_DESCRIPTION")).toBe(
+      true,
+    );
   });
 
   it("warns when include_infrastructure is set but no infra epic exists", () => {
