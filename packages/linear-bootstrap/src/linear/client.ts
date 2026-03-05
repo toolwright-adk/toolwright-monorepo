@@ -32,7 +32,6 @@ async function fetchAllPages<T>(
   const all: T[] = [];
   let cursor: string | undefined;
 
-   
   while (true) {
     const page = await fetchPage(cursor);
     all.push(...page.nodes);
