@@ -21,7 +21,6 @@ import { retrieveWorkspaceContext } from "../workspace-cache.js";
 import { introspectWorkspaceCore } from "./introspect-workspace.js";
 import { buildSystemPrompt } from "../planning/prompts.js";
 
-const DEFAULT_MODEL = "anthropic/claude-sonnet-4";
 
 function computeSummary(plan: Plan): PlanSummary {
   let totalIssues = 0;
@@ -51,11 +50,25 @@ export async function generatePlanCore(
   if (!apiKey) {
     throw new ExternalServiceError(
       "LLM_API_KEY environment variable is required",
-      "openrouter",
+      "llm",
     );
   }
 
-  const model = process.env.LLM_MODEL ?? DEFAULT_MODEL;
+  const baseURL = process.env.LLM_BASE_URL;
+  if (!baseURL) {
+    throw new ExternalServiceError(
+      "LLM_BASE_URL environment variable is required (e.g. https://openrouter.ai/api/v1)",
+      "llm",
+    );
+  }
+
+  const model = process.env.LLM_MODEL;
+  if (!model) {
+    throw new ExternalServiceError(
+      "LLM_MODEL environment variable is required (e.g. anthropic/claude-sonnet-4)",
+      "llm",
+    );
+  }
 
   // Auto-introspect workspace (non-blocking on failure)
   let workspaceContext: WorkspaceContext | undefined;
@@ -80,7 +93,7 @@ export async function generatePlanCore(
 
   const client = new OpenAI({
     apiKey,
-    baseURL: "https://openrouter.ai/api/v1",
+    baseURL,
   });
 
   const systemPrompt = buildSystemPrompt(args, workspaceContext);
@@ -99,7 +112,7 @@ export async function generatePlanCore(
 
   try {
     const { result: completion } = await withTiming(
-      "openrouter-generate-plan",
+      "llm-generate-plan",
       () =>
         client.chat.completions.create({
           model,
@@ -113,7 +126,7 @@ export async function generatePlanCore(
 
     responseText = completion.choices[0]?.message?.content ?? "";
   } catch (err) {
-    throw new ExternalServiceError("OpenRouter API call failed", "openrouter", {
+    throw new ExternalServiceError("LLM API call failed", "llm", {
       model,
       error: err instanceof Error ? err.message : String(err),
     });

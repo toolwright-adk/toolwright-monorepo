@@ -1,416 +1,316 @@
-# @toolwright-adk/linear-bootstrap
+# linear-bootstrap
 
-MCP server for bootstrapping Linear projects from natural language descriptions. Generates structured plans, validates them, and creates complete project hierarchies in Linear with milestones, epics, issues, labels, and dependency relations.
+Describe a project in plain language, get a fully structured Linear project — milestones, epics, issues, labels, and dependency chains — created in seconds.
 
-## Workflow
+The server reads your team's existing conventions (workflow states, labels, cycles) and generates plans that fit how your team already works. Existing labels are reused, not duplicated. Issues start in your team's default state. Project names avoid collisions with active work.
 
-The recommended sequence for bootstrapping a project:
+## Contents
 
-```
-list-teams → introspect-workspace → generate-plan → validate-plan → bootstrap-project
-```
+- [Quick Start](#quick-start)
+- [Examples](#examples)
+- [What It Does](#what-it-does)
+- [How It Works](#how-it-works)
+- [Project Archetypes](#project-archetypes)
+- [Environment Variables](#environment-variables)
+- [Tools](#tools)
+- [Workflow](#workflow)
+- [Other MCP Clients](#other-mcp-clients)
+- [Security](#security)
+- [Known Limitations](#known-limitations)
+- [Development](#development)
+- [License](#license)
 
-Or use the compound tool for a single call:
+## Quick Start
 
-```
-generate-and-bootstrap
-```
+### 1. Add the MCP server
 
-Both paths auto-introspect the workspace when `LINEAR_API_KEY` is available, reusing cached context for 30 minutes.
-
-## Tools
-
-### list-teams
-
-List all Linear teams accessible to the configured API key. Use this to discover `team_id` values for other tools.
-
-**Input:** none
-
-**Returns:** `[{ id, name, key }]` — array of accessible teams
-
-### introspect-workspace
-
-Read team conventions from Linear: workflow states, labels, cycles, existing projects. Returns cached context (30-min TTL). Called automatically by `generate-plan`, or use standalone to inspect team setup.
-
-**Input:**
-
-| Field     | Type   | Required | Description    |
-| --------- | ------ | -------- | -------------- |
-| `team_id` | string | yes      | Linear team ID |
-
-**Returns:** `WorkspaceContext` — team name, workflow states, default state, labels (with parent groups), custom fields, cycle info, existing projects
-
-### generate-plan
-
-Generate a structured project plan from a description. Returns a `plan_id` (cached server-side for 30 minutes) and summary statistics. The full plan is not returned to keep context lean — use `plan_id` with other tools.
-
-Auto-introspects the workspace when `LINEAR_API_KEY` is available, so generated plans respect existing labels, workflow states, and team conventions.
-
-**Input:**
-
-| Field                                | Type                                                                 | Required | Description                          |
-| ------------------------------------ | -------------------------------------------------------------------- | -------- | ------------------------------------ |
-| `description`                        | string                                                               | yes      | Natural language project description |
-| `team_id`                            | string                                                               | yes      | Linear team ID                       |
-| `complexity`                         | `"small" \| "medium" \| "large"`                                     | no       | Scale hint (default: `"medium"`)     |
-| `project_type`                       | `"feature" \| "infrastructure" \| "api" \| "migration"`              | no       | Archetype (default: `"feature"`)     |
-| `preferences.milestone_style`        | `"time-based" \| "deliverable-based" \| "hybrid"`                    | no       | Milestone naming style               |
-| `preferences.issue_detail_level`     | `"titles-only" \| "with-descriptions" \| "full-acceptance-criteria"` | no       | Issue detail level                   |
-| `preferences.include_infrastructure` | boolean                                                              | no       | Include infra/DevOps epic            |
-| `preferences.include_docs`           | boolean                                                              | no       | Include documentation epic           |
-
-**Returns:** `{ plan_id, summary }` — plan reference + statistics (total issues, epics, milestones, estimated points)
-
-**Project Archetypes:**
-
-| Type             | Example Milestones                                                | Example Epics                                      |
-| ---------------- | ----------------------------------------------------------------- | -------------------------------------------------- |
-| `feature`        | Spec & design, MVP behind feature flag, Public launch             | Backend APIs, Web UI, Analytics                    |
-| `infrastructure` | Prototype, Dogfood for one service, Org-wide rollout              | Core infra changes, Service migrations, Monitoring |
-| `api`            | API design sign-off, Backend implementation, General availability | Auth & rate limiting, Core endpoints, SDKs & DX    |
-| `migration`      | Dual-write in place, Backfill completed, Cutover                  | Data modeling, Backfill jobs, Cutover runbook      |
-
-### validate-plan
-
-Validate a project plan for structural issues. Pure logic, no external calls.
-
-**Input:**
-
-| Field         | Type   | Required     | Description                       |
-| ------------- | ------ | ------------ | --------------------------------- |
-| `plan_id`     | string | one required | Plan ID from generate-plan        |
-| `plan`        | Plan   | one required | Or inline plan object             |
-| `preferences` | object | no           | Same preferences as generate-plan |
-
-**Returns:** `{ valid, errors, warnings }` — boolean validity + arrays of `{ code, message, path? }`
-
-**Validation checks:**
-
-| Code                     | Severity | Description                                  |
-| ------------------------ | -------- | -------------------------------------------- |
-| `CIRCULAR_DEPENDENCY`    | error    | Cycle in depends_on graph                    |
-| `ORPHANED_DEPENDENCY`    | error    | depends_on references non-existent title     |
-| `UNDEFINED_MILESTONE`    | error    | Epic references missing milestone            |
-| `EMPTY_EPIC`             | error    | Epic with 0 issues                           |
-| `DUPLICATE_TITLE`        | error    | Same issue title appears twice               |
-| `LARGE_EPIC`             | warning  | Epic with >12 issues                         |
-| `HIGH_ESTIMATE`          | warning  | Issue estimate >5 points                     |
-| `NO_INFRASTRUCTURE_EPIC` | warning  | include_infrastructure set but no infra epic |
-| `EMPTY_DESCRIPTION`      | warning  | Epic has empty description                   |
-
-### bootstrap-project
-
-Create a complete Linear project from a plan. Creates project, milestones, labels, epics (as parent issues), child issues, and dependency relations.
-
-**Input:**
-
-| Field     | Type    | Required     | Description                                    |
-| --------- | ------- | ------------ | ---------------------------------------------- |
-| `plan_id` | string  | one required | Plan ID from generate-plan                     |
-| `plan`    | Plan    | one required | Or inline plan object                          |
-| `team_id` | string  | yes          | Linear team ID                                 |
-| `dry_run` | boolean | no           | Validate only, don't create (default: `false`) |
-
-**Returns:** `{ project_id, milestone_ids, label_ids, epic_ids, issue_ids, dependency_count }` — maps of name/title to Linear ID for all created resources
-
-**Behavior:**
-
-- Validates plan before execution; returns validation errors as data if invalid
-- Checks for existing project with same name (idempotency)
-- Creates resources in order: project, milestones, labels, epics, issues, dependencies
-- Tracks completed/failed arrays; throws `PartialExecutionError` on mid-batch failures
-- Label and dependency creation failures are non-critical (logged, skipped)
-
-### add-epic
-
-Add a single epic with its child issues to an existing Linear project.
-
-**Input:**
-
-| Field          | Type                   | Required | Description                |
-| -------------- | ---------------------- | -------- | -------------------------- |
-| `project_id`   | string                 | yes      | Existing Linear project ID |
-| `team_id`      | string                 | yes      | Linear team ID             |
-| `epic`         | Epic                   | yes      | Epic object with issues    |
-| `milestone_id` | string                 | no       | Milestone to wire epic to  |
-| `label_ids`    | Record<string, string> | no       | Label name-to-ID mapping   |
-
-**Returns:** `{ epic_id, issue_ids }` — created epic ID + map of issue titles to IDs
-
-### generate-and-bootstrap
-
-Compound tool that generates a plan, validates it, and bootstraps it in Linear in a single call. Eliminates the plan echo that wastes context when using generate-plan + bootstrap-project separately.
-
-**Input:**
-
-| Field          | Type                                                    | Required | Description                                 |
-| -------------- | ------------------------------------------------------- | -------- | ------------------------------------------- |
-| `description`  | string                                                  | yes      | Natural language project description        |
-| `team_id`      | string                                                  | yes      | Linear team ID                              |
-| `complexity`   | `"small" \| "medium" \| "large"`                        | no       | Scale hint (default: `"medium"`)            |
-| `project_type` | `"feature" \| "infrastructure" \| "api" \| "migration"` | no       | Archetype (default: `"feature"`)            |
-| `preferences`  | object                                                  | no       | Same as generate-plan                       |
-| `dry_run`      | boolean                                                 | no       | Generate + validate only (default: `false`) |
-
-**Returns:** `{ plan_id, summary, validation, bootstrap? }` — plan reference, stats, validation result, and bootstrap result (when not dry_run and validation passes)
-
-## Examples
-
-### list-teams
-
-**Input:**
-
-```json
-{}
-```
-
-**Output:**
-
-```json
-[
-  { "id": "team-abc123", "name": "Engineering", "key": "ENG" },
-  { "id": "team-def456", "name": "Design", "key": "DES" }
-]
-```
-
-### introspect-workspace
-
-**Input:**
-
-```json
-{ "team_id": "team-abc123" }
-```
-
-**Output:**
+Add to your MCP client config (Claude Code, Cursor, Windsurf, etc.):
 
 ```json
 {
-  "team_name": "Engineering",
-  "workflow_states": [
-    { "id": "state-1", "name": "Backlog", "type": "backlog" },
-    { "id": "state-2", "name": "In Progress", "type": "started" }
-  ],
-  "default_state_id": "state-1",
-  "default_state_name": "Backlog",
-  "labels": [{ "id": "label-1", "name": "backend" }],
-  "custom_fields": [],
-  "cycles_enabled": true,
-  "active_cycle": {
-    "id": "cycle-1",
-    "name": "Cycle 12",
-    "starts_at": "2026-03-01T00:00:00Z",
-    "ends_at": "2026-03-14T00:00:00Z"
-  },
-  "existing_projects": [
-    { "id": "proj-1", "name": "Auth Revamp", "state": "started" }
-  ]
+  "mcpServers": {
+    "linear-bootstrap": {
+      "command": "node",
+      "args": ["/path/to/linear-bootstrap/dist/server.js"],
+      "env": {
+        "LINEAR_API_KEY": "lin_api_...",
+        "LLM_API_KEY": "...",
+        "LLM_BASE_URL": "https://openrouter.ai/api/v1",
+        "LLM_MODEL": "anthropic/claude-sonnet-4"
+      }
+    }
+  }
 }
 ```
 
-### generate-plan
+### 2. Install the Agent Skill (optional)
 
-**Input:**
+Install the included [Agent Skill](https://agentskills.io) to get a `/linear-bootstrap` slash command:
+
+```bash
+cp -r /path/to/linear-bootstrap/.claude/skills/linear-bootstrap .claude/skills/
+```
+
+The skill works with any agent that supports the Agent Skills format (Claude Code, Cursor, Copilot, OpenClaw, etc.). It's tool-agnostic — it describes *what* needs to happen (find team, generate plan, validate, create), not which specific tool to call. Any agent with the MCP server connected will have the right tools available.
+
+### 3. Use it
+
+```
+/linear-bootstrap CLI tool for managing database migrations
+```
+
+The skill walks you through team selection, plan review, and project creation interactively. Say "just do it" to skip the review step.
+
+The skill is optional — you can also direct your agent to use the tools directly or according to your own agent guidelines. For example: *"Bootstrap a Linear project for building a Slack integration."*
+
+## Examples
+
+<!-- Screenshots or GIFs can be added alongside each example -->
+
+### Interactive — review before creating
+
+```
+You:   /linear-bootstrap CLI tool for managing database migrations
+
+Agent: Found team "Engineering" (ENG). I'll generate a migration project plan...
+
+       Plan ready: 4 milestones, 5 epics, 18 issues, ~32 points.
+       Does this look right, or should I adjust the scope?
+
+You:   Looks good, go ahead.
+
+Agent: Created "Database Migration CLI" in Linear:
+       - 4 milestones (Inventory & plan → Cutover)
+       - 5 epics, 18 issues, 12 dependencies
+       - Reused 6 existing labels, created 1 new
+```
+
+### One-shot — skip the review
+
+```
+You:   /linear-bootstrap just do it — webhook subscriptions API
+
+Agent: Created "Webhook Subscriptions API" in Linear:
+       - 4 milestones (API design → GA), 5 epics, 18 issues
+       - 12 dependencies, 6 labels reused
+```
+
+### Infrastructure project
+
+```
+You:   /linear-bootstrap shared logging library for the monorepo, infrastructure type
+
+Agent: Found team "Platform" (PLT). Generating an infrastructure project plan...
+
+       Plan ready: 2 milestones (Core library ready → Org-wide adoption),
+       4 epics, 14 issues.
+       Proceed?
+```
+
+## What It Does
+
+One tool call like this:
 
 ```json
 {
   "description": "Build a Slack integration for posting Linear updates",
   "team_id": "team-abc123",
-  "complexity": "medium",
   "project_type": "feature"
 }
 ```
 
-**Output:**
+Creates all of this in Linear:
 
-```json
-{
-  "plan_id": "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
-  "summary": {
-    "total_issues": 12,
-    "total_epics": 3,
-    "total_milestones": 2,
-    "estimated_points": 34
-  }
-}
-```
+- **Project** with description
+- **Milestones** (e.g. Spec & design → MVP → Launch → Polish)
+- **Epics** as parent issues, each wired to a milestone
+- **Issues** with labels, priorities, and descriptions
+- **Dependencies** between issues (blocks/blocked-by)
+- **Labels** reused from your team when they exist, created only when new
+
+The plan generation is context-aware — it introspects your team's workspace first, so the output respects your existing setup rather than creating a mess of duplicates.
+
+## How It Works
+
+**Context-aware generation** — Before generating a plan, the server reads your team's workspace: workflow states, labels, active cycle, existing projects. This context is injected into the LLM prompt so plans use your team's naming conventions and avoid conflicts.
+
+**Label reuse** — During bootstrap, existing team labels are matched by name. New labels are only created when there's no match. No duplicates.
+
+**Plan caching** — The full plan is cached server-side and referenced by `plan_id`. Only a summary crosses into your agent's context window (~100 tokens vs ~3,000+ for the full plan). This keeps multi-step workflows lean.
+
+**Idempotency** — `bootstrap-project` checks for an existing project with the same name before creating. If found, it returns the existing project ID without making changes.
+
+## Project Archetypes
+
+The `project_type` parameter tailors the plan structure:
+
+| Type | When to use | Example milestones |
+|------|------------|-------------------|
+| `feature` (default) | New user-facing functionality | Spec & design → MVP behind flag → Public launch |
+| `infrastructure` | Internal tooling, platform work | Prototype → Dogfood → Org-wide rollout |
+| `api` | Public or internal API development | API design sign-off → Implementation → GA |
+| `migration` | Moving between systems | Dual-write → Backfill → Cutover → Decommission |
+
+## Environment Variables
+
+| Variable | Required | Description |
+|----------|----------|-------------|
+| `LINEAR_API_KEY` | Yes | Linear API key ([create one here](https://linear.app/settings/api)) |
+| `LLM_API_KEY` | Yes | API key for an OpenAI-compatible provider |
+| `LLM_BASE_URL` | Yes | Provider's base URL |
+| `LLM_MODEL` | Yes | Model ID for your provider |
+
+Any provider that uses the [OpenAI chat completions API](https://platform.openai.com/docs/api-reference/chat) works. Common setups:
+
+| Provider | `LLM_BASE_URL` | `LLM_MODEL` example |
+|----------|----------------|---------------------|
+| OpenRouter | `https://openrouter.ai/api/v1` | `anthropic/claude-sonnet-4` |
+| Together | `https://api.together.xyz/v1` | `meta-llama/Llama-3-70b-chat-hf` |
+| OpenAI | `https://api.openai.com/v1` | `gpt-4o` |
+| Ollama (local) | `http://localhost:11434/v1` | `llama3` |
+
+## Tools
+
+### list-teams
+
+List all Linear teams accessible to the configured API key. Call this first if you don't know your team ID.
+
+**Input:** none
+**Returns:** `[{ id, name, key }]`
+**API calls:** 1 Linear read — `teams` query
+
+### introspect-workspace
+
+Read team conventions from Linear. Called automatically by `generate-plan`, but available standalone to inspect your team's setup. Results are cached server-side for 30 minutes; subsequent calls for the same team return instantly.
+
+**Input:** `{ team_id }`
+**Returns:** `{ team_name, workflow_states, default_state_id, default_state_name, labels, custom_fields, cycles_enabled, active_cycle?, existing_projects }`
+**API calls:** 5–6 Linear reads — team info, workflow states, labels (with parent resolution), default issue state, team projects, and active cycle (only if cycles are enabled)
+
+### generate-plan
+
+Generate a structured project plan from a natural-language description. The full plan is cached server-side and only a `plan_id` + summary is returned to keep your agent's context lean.
+
+If `LINEAR_API_KEY` is set and workspace context isn't already cached, this tool auto-introspects the team first (see `introspect-workspace` above). The workspace context is injected into the LLM prompt so the generated plan uses your team's existing labels, respects triage states, and avoids project name collisions.
+
+**Input:**
+
+| Field | Type | Required | Default |
+|-------|------|----------|---------|
+| `description` | string | yes | |
+| `team_id` | string | yes | |
+| `complexity` | `"small"` \| `"medium"` \| `"large"` | no | `"medium"` |
+| `project_type` | `"feature"` \| `"infrastructure"` \| `"api"` \| `"migration"` | no | `"feature"` |
+| `preferences.milestone_style` | `"time-based"` \| `"deliverable-based"` \| `"hybrid"` | no | |
+| `preferences.issue_detail_level` | `"titles-only"` \| `"with-descriptions"` \| `"full-acceptance-criteria"` | no | |
+| `preferences.include_infrastructure` | boolean | no | |
+| `preferences.include_docs` | boolean | no | |
+
+**Returns:** `{ plan_id, summary }` — summary has `total_issues`, `total_epics`, `total_milestones`, `estimated_points`
+**API calls:** 1 LLM call (chat completion via `LLM_BASE_URL`/`LLM_MODEL`) + 0–6 Linear reads (auto-introspect, skipped if cached)
 
 ### validate-plan
 
-**Input:**
+Check a plan for structural issues before creating anything. No external calls — pure logic.
 
-```json
-{ "plan_id": "a1b2c3d4-e5f6-7890-abcd-ef1234567890" }
-```
+**Input:** `{ plan_id }` or `{ plan }` (inline plan object)
+**Returns:** `{ valid, errors, warnings }`
+**API calls:** none
 
-**Output:**
-
-```json
-{
-  "valid": true,
-  "errors": [],
-  "warnings": [
-    {
-      "code": "HIGH_ESTIMATE",
-      "message": "Issue estimate 8 exceeds 5",
-      "path": "epics[1].issues[2]"
-    }
-  ]
-}
-```
+Checks for: circular dependencies, orphaned dependency references, undefined milestones, empty epics, duplicate titles, oversized epics (>12 issues), high estimates (>5 points).
 
 ### bootstrap-project
 
+Create a complete Linear project from a plan. Validates the plan first; if validation fails, returns the errors without creating anything.
+
 **Input:**
 
-```json
-{
-  "plan_id": "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
-  "team_id": "team-abc123"
-}
-```
+| Field | Type | Required | Default |
+|-------|------|----------|---------|
+| `plan_id` | string | one of plan_id/plan | |
+| `plan` | Plan | one of plan_id/plan | |
+| `team_id` | string | yes | |
+| `dry_run` | boolean | no | `false` |
 
-**Output:**
+**Returns:** `{ project_id, milestone_ids, label_ids, epic_ids, issue_ids, dependency_count }`
+**API calls:** 1 Linear read (project name check for idempotency) + N Linear writes, specifically:
+- 1 `createProject`
+- 1 `createProjectMilestone` per milestone
+- 0–N `createIssueLabel` (only for labels not already on the team)
+- 1 `createIssue` per epic + 1 per child issue
+- 1 `createIssueRelation` per dependency
 
-```json
-{
-  "project_id": "proj-new789",
-  "milestone_ids": { "MVP": "ms-001", "Launch": "ms-002" },
-  "label_ids": { "backend": "label-1", "frontend": "label-2" },
-  "epic_ids": { "Slack OAuth": "issue-100" },
-  "issue_ids": {
-    "Implement OAuth flow": "issue-101",
-    "Store tokens": "issue-102"
-  },
-  "dependency_count": 3
-}
-```
+Labels that already exist on the team (matched by name from workspace cache) are reused by ID. All issues are created with the team's default workflow state. Label and dependency creation failures are non-critical (logged and skipped).
 
 ### add-epic
 
-**Input:**
+Add a single epic with child issues to an existing project.
 
-```json
-{
-  "project_id": "proj-new789",
-  "team_id": "team-abc123",
-  "epic": {
-    "title": "Monitoring",
-    "description": "Add observability for the Slack integration",
-    "milestone": "Launch",
-    "issues": [
-      {
-        "title": "Add Datadog metrics",
-        "labels": ["backend"],
-        "priority": 2,
-        "depends_on": []
-      },
-      {
-        "title": "Create alert runbook",
-        "labels": ["docs"],
-        "priority": 3,
-        "depends_on": ["Add Datadog metrics"]
-      }
-    ]
-  },
-  "milestone_id": "ms-002"
-}
-```
+**Input:** `{ project_id, team_id, epic, milestone_id?, label_ids? }`
+**Returns:** `{ epic_id, issue_ids }`
+**API calls:** 1 Linear read (project issues for idempotency check) + N Linear writes (1 epic issue + 1 per child issue + 1 per dependency)
 
-**Output:**
+### generate-and-bootstrap
 
-```json
-{
-  "epic_id": "issue-200",
-  "issue_ids": {
-    "Add Datadog metrics": "issue-201",
-    "Create alert runbook": "issue-202"
-  }
-}
-```
+Compound tool — generates a plan, validates it, and creates everything in Linear in one call. Combines `generate-plan` + `validate-plan` + `bootstrap-project` internally. Best for when you don't need to review the plan before execution.
 
-## Required Environment Variables
+**Input:** Same as `generate-plan` plus `dry_run` (boolean, default `false`)
+**Returns:** `{ plan_id, summary, validation, bootstrap? }` — bootstrap is omitted if validation fails or `dry_run` is true
+**API calls:** 1 LLM call + 0–6 Linear reads (introspect) + 1 Linear read (idempotency) + N Linear writes (all resources)
 
-| Variable         | Required By                                         | Description                                               |
-| ---------------- | --------------------------------------------------- | --------------------------------------------------------- |
-| `LLM_API_KEY`    | generate-plan, generate-and-bootstrap               | OpenRouter API key                                        |
-| `LINEAR_API_KEY` | bootstrap-project, add-epic, generate-and-bootstrap | Linear API key                                            |
-| `LLM_MODEL`      | generate-plan (optional)                            | Override LLM model (default: `anthropic/claude-sonnet-4`) |
+## Workflow
 
-## MCP Client Configuration
+**Step by step** (full control):
 
-### Claude Code
+1. Call `list-teams` and pick your `team_id`.
+2. Call `generate-plan` with your description and `team_id`. You get back a `plan_id` and summary.
+3. Call `validate-plan` with the `plan_id` to check for structural issues.
+4. Call `bootstrap-project` with the `plan_id` and `team_id` to create everything in Linear.
 
-Add to your project's `.mcp.json` or `~/.claude.json`:
+**One-shot** (skip the review):
 
-```json
-{
-  "mcpServers": {
-    "linear-bootstrap": {
-      "command": "node",
-      "args": ["/path/to/packages/linear-bootstrap/dist/server.js"],
-      "env": {
-        "LLM_API_KEY": "sk-or-...",
-        "LINEAR_API_KEY": "lin_api_..."
-      }
-    }
-  }
-}
-```
+Call `generate-and-bootstrap` — it runs all four steps internally and creates the project in one call.
 
-### Cursor / Windsurf
+Both paths auto-introspect the workspace. Context is cached for 30 minutes per team.
 
-Add to your MCP settings (typically `.cursor/mcp.json`):
+## Other MCP Clients
 
-```json
-{
-  "mcpServers": {
-    "linear-bootstrap": {
-      "command": "node",
-      "args": ["/path/to/packages/linear-bootstrap/dist/server.js"],
-      "env": {
-        "LLM_API_KEY": "sk-or-...",
-        "LINEAR_API_KEY": "lin_api_..."
-      }
-    }
-  }
-}
-```
+The Quick Start config works with any stdio-compatible MCP client. Client-specific locations:
 
-### Generic MCP Client (stdio)
+- **Claude Code:** `.claude/mcp.json` or `claude mcp add`
+- **Cursor / Windsurf:** `.cursor/mcp.json`
 
-The server communicates over stdin/stdout using the MCP protocol:
+For generic stdio clients:
 
 ```bash
-LLM_API_KEY=sk-or-... LINEAR_API_KEY=lin_api_... node dist/server.js
+LINEAR_API_KEY=... LLM_API_KEY=... LLM_BASE_URL=... LLM_MODEL=... node dist/server.js
 ```
 
-## Usage
+## Security
+
+The server needs two sets of credentials:
+
+- **Linear API key** — used to read team conventions and create projects. Scoped to one workspace; the key determines which teams are accessible. Create a key with the minimum permissions your workflow needs at [linear.app/settings/api](https://linear.app/settings/api).
+- **LLM API key** — your project description is sent to whichever LLM provider you configure via `LLM_BASE_URL`. No Linear data (issues, comments, user info) is sent to the LLM — only the project description you provide, plus a summary of team labels, workflow states, and project names used to avoid duplicates.
+
+No credentials are logged or cached to disk. Plan and workspace caches are in-memory only and cleared on server restart.
+
+## Known Limitations
+
+- **One workspace per server instance** — the `LINEAR_API_KEY` determines the workspace. To work across workspaces, run separate server instances.
+- **In-memory caches** — plan and workspace caches don't survive server restarts. A previously returned `plan_id` becomes invalid after restart.
+- **Custom fields** — the schema supports them, but the Linear SDK (v37) doesn't expose custom field definitions. The `custom_fields` array is always empty.
+- **No import** — this server creates new Linear projects; it doesn't import from Jira, GitHub Projects, Asana, etc.
+- **LLM quality** — plan quality depends on your model. Larger models (Claude Sonnet, GPT-4o, Llama 3 70B) produce better-structured plans than smaller ones.
+
+## Development
 
 ```bash
-# Build
-pnpm build
-
-# Run via stdio (for MCP client integration)
-LLM_API_KEY=... LINEAR_API_KEY=... pnpm start
-
-# Run tests
-pnpm test
+pnpm build    # compile
+pnpm test     # run tests
+pnpm lint     # type-check
 ```
 
-## Context-Aware Behavior
+## License
 
-When `LINEAR_API_KEY` is available, `generate-plan` and `generate-and-bootstrap` automatically introspect the target team's workspace before generating a plan. This means:
-
-- **Label reuse** — existing team labels are reused by exact name match; new labels are only created when no match exists
-- **Workflow awareness** — triage states are respected (issues never bypass triage); the team's default state is applied to all created issues
-- **Project collision avoidance** — the LLM is told about active projects to avoid naming conflicts
-- **Cycle fit** — when cycles are enabled, the LLM is guided to keep issues sized for one cycle
-- **Custom fields** — required custom fields are noted in the prompt (schema-ready; SDK v37 does not expose custom fields yet, so this array is always empty for now)
-
-Workspace context is cached for 30 minutes per team. Call `introspect-workspace` directly to inspect or refresh.
-
-## Context Efficiency
-
-The server uses **server-side plan caching** to minimize context window pollution. When an agent calls `generate-plan`, the full plan is stored in memory and only a `plan_id` + summary is returned (~100 tokens vs ~3000+ for the full plan). Subsequent calls to `validate-plan` or `bootstrap-project` reference the plan by `plan_id`, avoiding the need to echo the entire plan object back through the agent's context.
-
-For the simplest workflow, use `generate-and-bootstrap` — a single tool call that handles everything internally, returning only the final result.
+[MIT](../../LICENSE) — see the repository root.

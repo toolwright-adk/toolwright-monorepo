@@ -58,7 +58,11 @@ describe("generatePlan", () => {
   let ctx: ReturnType<typeof createTestContext>;
 
   beforeEach(() => {
-    ctx = createTestContext({ LLM_API_KEY: "test-key" });
+    ctx = createTestContext({
+      LLM_API_KEY: "test-key",
+      LLM_BASE_URL: "https://api.example.com/v1",
+      LLM_MODEL: "test-model",
+    });
     clearPlanCache();
     clearWorkspaceCache();
   });
