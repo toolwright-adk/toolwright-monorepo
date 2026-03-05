@@ -44,7 +44,8 @@
     "test:watch": "vitest",
     "clean": "rm -rf dist",
     "lint": "tsc --noEmit",
-    "format:check": "prettier --check src/"
+    "format:check": "prettier --check src/",
+    "prepublishOnly": "pnpm build"
   },
   "dependencies": {
     "pino": "^10.3.1",

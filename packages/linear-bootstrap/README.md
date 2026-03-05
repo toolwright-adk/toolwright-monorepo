@@ -50,7 +50,7 @@ Or if you prefer a local checkout:
   "mcpServers": {
     "linear-bootstrap": {
       "command": "node",
-      "args": ["/path/to/linear-bootstrap/dist/server.js"],
+      "args": ["/path/to/linear-bootstrap/dist/cli.js"],
       "env": {
         "LINEAR_API_KEY": "lin_api_...",
         "LLM_API_KEY": "...",
@@ -306,7 +306,7 @@ The Quick Start config works with any stdio-compatible MCP client. Client-specif
 For generic stdio clients:
 
 ```bash
-LINEAR_API_KEY=... LLM_API_KEY=... LLM_BASE_URL=... LLM_MODEL=... node dist/server.js
+LINEAR_API_KEY=... LLM_API_KEY=... LLM_BASE_URL=... LLM_MODEL=... node dist/cli.js
 ```
 
 ## Security
@@ -348,10 +348,10 @@ import {
 } from "@toolwright-adk/linear-bootstrap";
 ```
 
-The `./server` subpath export gives you the executable entry point (stdio transport included):
+The `./server` subpath export provides `createServer` directly (without re-exporting the core functions):
 
 ```typescript
-import "@toolwright-adk/linear-bootstrap/server";
+import { createServer } from "@toolwright-adk/linear-bootstrap/server";
 ```
 
 ## Development

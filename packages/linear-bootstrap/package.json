@@ -34,7 +34,7 @@
     }
   },
   "bin": {
-    "linear-bootstrap": "dist/server.js"
+    "linear-bootstrap": "dist/cli.js"
   },
   "files": [
     "dist"
@@ -44,12 +44,13 @@
   },
   "scripts": {
     "build": "tsup",
-    "start": "node dist/server.js",
+    "start": "node dist/cli.js",
     "test": "vitest run",
     "test:watch": "vitest",
     "clean": "rm -rf dist",
     "lint": "tsc --noEmit",
-    "format:check": "prettier --check src/"
+    "format:check": "prettier --check src/",
+    "prepublishOnly": "pnpm build"
   },
   "dependencies": {
     "@linear/sdk": "^37.0.0",
