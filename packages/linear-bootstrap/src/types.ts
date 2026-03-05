@@ -5,9 +5,9 @@ export const IssueSchema = z.object({
   description: z.string().optional(),
   // Linear uses 0 (none) through 4; we require a priority for generated plans
   estimate: z.number().int().min(0).optional(),
-  labels: z.array(z.string()),
+  labels: z.array(z.string()).default([]),
   priority: z.number().min(1).max(4),
-  depends_on: z.array(z.string()),
+  depends_on: z.array(z.string()).default([]),
 });
 
 export const EpicSchema = z.object({

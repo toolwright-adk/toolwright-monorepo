@@ -118,6 +118,7 @@ export async function generatePlanCore(
           { role: "user", content: args.description },
         ],
         temperature: 0.3,
+        max_tokens: 16000,
       }),
     );
 
