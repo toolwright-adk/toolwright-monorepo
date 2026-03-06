@@ -181,7 +181,7 @@ If `LINEAR_API_KEY` is set and workspace context isn't already cached, this tool
 
 Check a plan for structural issues before creating anything. No external calls — pure logic.
 
-**Input:** `{ plan_id }` or `{ plan }` (inline plan object)
+**Input:** `{ plan_id }` or `{ plan }` (inline plan object), plus optional `complexity` and `preferences` (affects scale-check warnings)
 **Returns:** `{ valid, errors, warnings }`
 **API calls:** none
 
@@ -200,7 +200,7 @@ Create a complete Linear project from a plan. Validates the plan first; if valid
 | `team_id` | string  | yes                 |         |
 | `dry_run` | boolean | no                  | `false` |
 
-**Returns:** `{ project_id, milestone_ids, label_ids, epic_ids, issue_ids, dependency_count }`
+**Returns:** `{ project_id, milestone_ids, label_ids, epic_ids, issue_ids, dependency_count }` (when `dry_run: false`). When `dry_run: true`, returns `{ valid, errors, warnings }` (the validation result).
 **API calls:** 1 Linear read (project name check for idempotency) + N Linear writes, specifically:
 
 - 1 `createProject`
@@ -238,7 +238,7 @@ Compound tool — generates a plan, validates it, and creates everything in Line
 
 **One-shot** (skip the review):
 
-Call `generate-and-bootstrap` — it runs all four steps internally and creates the project in one call.
+Call `generate-and-bootstrap` — it runs all three steps internally and creates the project in one call.
 
 Both paths auto-introspect the workspace. Context is cached for 30 minutes per team.
 
@@ -287,7 +287,19 @@ import {
   validatePlan,
   bootstrapProject,
   introspectWorkspace,
+  addEpic,
+  generateAndBootstrap,
+  listTeams,
 } from "@toolwright-adk/linear-bootstrap";
+import { createLogger } from "@toolwright-adk/shared";
+
+const logger = createLogger("my-app");
+
+// generatePlan and introspectWorkspace require a logger as second parameter
+const { plan_id, summary } = await generatePlan(
+  { description: "Build a feature", team_id: "team-123" },
+  logger,
+);
 ```
 
 ## Development
