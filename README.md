@@ -19,7 +19,7 @@ pnpm build
 pnpm test
 ```
 
-To use the Linear Bootstrap MCP server without cloning, see the [linear-bootstrap README](packages/linear-bootstrap).
+To use the Linear Bootstrap MCP server without cloning, see the [linear-bootstrap README](packages/linear-bootstrap/README.md).
 
 ## Monorepo Structure
 
