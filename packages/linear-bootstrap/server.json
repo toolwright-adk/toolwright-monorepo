@@ -1,7 +1,7 @@
 {
   "$schema": "https://static.modelcontextprotocol.io/schemas/2025-12-11/server.schema.json",
   "name": "io.github.toolwright-adk/linear-bootstrap",
-  "description": "MCP server for bootstrapping Linear projects from natural language. Generates structured plans with milestones, epics, issues, labels, and dependencies — workspace-aware, context-efficient.",
+  "description": "Bootstrap Linear projects from natural language \u2014 milestones, epics, issues, and dependencies.",
   "repository": {
     "url": "https://github.com/toolwright-adk/toolwright-monorepo",
     "source": "github"
