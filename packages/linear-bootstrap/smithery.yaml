@@ -1,0 +1,31 @@
+# Smithery configuration file: https://smithery.ai/docs/config
+
+startCommand:
+  type: stdio
+  configSchema:
+    type: object
+    required:
+      - linearApiKey
+      - llmApiKey
+      - llmBaseUrl
+      - llmModel
+    properties:
+      linearApiKey:
+        type: string
+        description: Linear API key (create at linear.app/settings/api)
+      llmApiKey:
+        type: string
+        description: API key for an OpenAI-compatible LLM provider
+      llmBaseUrl:
+        type: string
+        description: "Base URL for the LLM API (e.g. https://openrouter.ai/api/v1)"
+      llmModel:
+        type: string
+        description: "Model ID for plan generation (e.g. anthropic/claude-sonnet-4.6)"
+  commandFunction: |-
+    (config) => ({ command: 'npx', args: ['-y', '@toolwright-adk/linear-bootstrap'], env: { LINEAR_API_KEY: config.linearApiKey, LLM_API_KEY: config.llmApiKey, LLM_BASE_URL: config.llmBaseUrl, LLM_MODEL: config.llmModel } })
+  exampleConfig:
+    linearApiKey: lin_api_...
+    llmApiKey: sk-...
+    llmBaseUrl: https://openrouter.ai/api/v1
+    llmModel: anthropic/claude-sonnet-4.6
