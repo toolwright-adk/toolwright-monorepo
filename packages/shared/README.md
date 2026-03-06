@@ -18,6 +18,7 @@ Typed error hierarchy that converts to MCP error format via `.toMCPError()`.
 
 ```typescript
 import {
+  ToolwrightError,
   ToolInputError,
   ExternalServiceError,
   PlanValidationError,
@@ -34,7 +35,7 @@ throw new PartialExecutionError(
 );
 ```
 
-All extend the abstract `ToolwrightError` base class with a `code` property and `toMCPError()` method.
+All extend the abstract `ToolwrightError` base class with a `code` property and `toMCPError()` method. Use `ToolwrightError` for `instanceof` checks to catch any Toolwright error.
 
 ### Validation
 

@@ -8,11 +8,16 @@ dist/
 coverage/
 .turbo/
 .opencode/*
+.mcp.json
 CLAUDE.md
+docs/internal/
 
 # Dolt database files (added by bd init)
 .dolt/
 *.db
+
+# Pack tarballs
+*.tgz
 
 # Beads issue tracking
 .beads/

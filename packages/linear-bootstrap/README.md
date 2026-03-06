@@ -4,8 +4,11 @@ Describe a project in plain language, get a fully structured Linear project — 
 
 The server reads your team's existing conventions (workflow states, labels, cycles) and generates plans that fit how your team already works. Existing labels are reused, not duplicated. Issues start in your team's default state. Project names avoid collisions with active work.
 
+![linear-bootstrap demo](https://raw.githubusercontent.com/toolwright-adk/toolwright-monorepo/main/docs/linear-bootstrap/linear-bootstrap-demo.gif)
+
 ## Contents
 
+- [Example](#example)
 - [Quick Start](#quick-start)
 - [What It Does](#what-it-does)
 - [How It Works](#how-it-works)
@@ -18,6 +21,14 @@ The server reads your team's existing conventions (workflow states, labels, cycl
 - [Known Limitations](#known-limitations)
 - [Development](#development)
 - [License](#license)
+
+## Example
+
+> _"Set up a Linear project for building a todo CLI app. Show me the plan with 3 epics before creating it."_
+
+The agent introspects your team's workspace, generates a structured plan, and creates everything in Linear:
+
+![Linear dashboard after bootstrap](https://raw.githubusercontent.com/toolwright-adk/toolwright-monorepo/main/docs/linear-bootstrap/linear-bootstrap-result.png)
 
 ## Quick Start
 
@@ -80,7 +91,7 @@ Creates all of this in Linear:
 
 - **Project** with description
 - **Milestones** (e.g. Spec & design → MVP → Launch → Polish)
-- **Epics** as parent issues, each wired to a milestone
+- **Epics** as parent issues (Linear doesn't have a dedicated epic type — these are regular issues with children), each wired to a milestone
 - **Issues** with labels, priorities, and descriptions
 - **Dependencies** between issues (blocks/blocked-by)
 - **Labels** reused from your team when they exist, created only when new
@@ -170,7 +181,7 @@ If `LINEAR_API_KEY` is set and workspace context isn't already cached, this tool
 
 Check a plan for structural issues before creating anything. No external calls — pure logic.
 
-**Input:** `{ plan_id }` or `{ plan }` (inline plan object)
+**Input:** `{ plan_id }` or `{ plan }` (inline plan object), plus optional `complexity` and `preferences` (affects scale-check warnings)
 **Returns:** `{ valid, errors, warnings }`
 **API calls:** none
 
@@ -189,7 +200,7 @@ Create a complete Linear project from a plan. Validates the plan first; if valid
 | `team_id` | string  | yes                 |         |
 | `dry_run` | boolean | no                  | `false` |
 
-**Returns:** `{ project_id, milestone_ids, label_ids, epic_ids, issue_ids, dependency_count }`
+**Returns:** `{ project_id, milestone_ids, label_ids, epic_ids, issue_ids, dependency_count }` (when `dry_run: false`). When `dry_run: true`, returns `{ valid, errors, warnings }` (the validation result).
 **API calls:** 1 Linear read (project name check for idempotency) + N Linear writes, specifically:
 
 - 1 `createProject`
@@ -202,7 +213,7 @@ Labels that already exist on the team (matched by name from workspace cache) are
 
 ### add-epic
 
-Add a single epic with child issues to an existing project.
+Add a single epic (parent issue with children) to an existing project.
 
 **Input:** `{ project_id, team_id, epic, milestone_id?, label_ids? }`
 **Returns:** `{ epic_id, issue_ids }`
@@ -227,7 +238,7 @@ Compound tool — generates a plan, validates it, and creates everything in Line
 
 **One-shot** (skip the review):
 
-Call `generate-and-bootstrap` — it runs all four steps internally and creates the project in one call.
+Call `generate-and-bootstrap` — it runs all three steps internally and creates the project in one call.
 
 Both paths auto-introspect the workspace. Context is cached for 30 minutes per team.
 
@@ -276,7 +287,19 @@ import {
   validatePlan,
   bootstrapProject,
   introspectWorkspace,
+  addEpic,
+  generateAndBootstrap,
+  listTeams,
 } from "@toolwright-adk/linear-bootstrap";
+import { createLogger } from "@toolwright-adk/shared";
+
+const logger = createLogger("my-app");
+
+// generatePlan and introspectWorkspace require a logger as second parameter
+const { plan_id, summary } = await generatePlan(
+  { description: "Build a feature", team_id: "team-123" },
+  logger,
+);
 ```
 
 ## Development
