@@ -46,7 +46,7 @@ Add to your MCP client config (Claude Code, Cursor, Windsurf, etc.):
         "LINEAR_API_KEY": "lin_api_...",
         "LLM_API_KEY": "...",
         "LLM_BASE_URL": "https://openrouter.ai/api/v1",
-        "LLM_MODEL": "anthropic/claude-sonnet-4"
+        "LLM_MODEL": "anthropic/claude-sonnet-4.6"
       }
     }
   }
@@ -132,7 +132,7 @@ Any provider that uses the [OpenAI chat completions API](https://platform.openai
 
 | Provider       | `LLM_BASE_URL`                 | `LLM_MODEL` example              |
 | -------------- | ------------------------------ | -------------------------------- |
-| OpenRouter     | `https://openrouter.ai/api/v1` | `anthropic/claude-sonnet-4`      |
+| OpenRouter     | `https://openrouter.ai/api/v1` | `anthropic/claude-sonnet-4.6`    |
 | Together       | `https://api.together.xyz/v1`  | `meta-llama/Llama-3-70b-chat-hf` |
 | OpenAI         | `https://api.openai.com/v1`    | `gpt-4o`                         |
 | Ollama (local) | `http://localhost:11434/v1`    | `llama3`                         |
@@ -144,7 +144,9 @@ Any provider that uses the [OpenAI chat completions API](https://platform.openai
 List all Linear teams accessible to the configured API key. Call this first if you don't know your team ID.
 
 **Input:** none
+
 **Returns:** `[{ id, name, key }]`
+
 **API calls:** 1 Linear read — `teams` query
 
 ### introspect-workspace
@@ -152,7 +154,9 @@ List all Linear teams accessible to the configured API key. Call this first if y
 Read team conventions from Linear. Called automatically by `generate-plan`, but available standalone to inspect your team's setup. Results are cached server-side for 30 minutes; subsequent calls for the same team return instantly.
 
 **Input:** `{ team_id }`
+
 **Returns:** `{ team_name, workflow_states, default_state_id, default_state_name, labels, custom_fields, cycles_enabled, active_cycle?, existing_projects }`
+
 **API calls:** 5–6 Linear reads — team info, workflow states, labels (with parent resolution), default issue state, team projects, and active cycle (only if cycles are enabled)
 
 ### generate-plan
@@ -175,6 +179,7 @@ If `LINEAR_API_KEY` is set and workspace context isn't already cached, this tool
 | `preferences.include_docs`           | boolean                                                                  | no       |             |
 
 **Returns:** `{ plan_id, summary }` — summary has `total_issues`, `total_epics`, `total_milestones`, `estimated_points`
+
 **API calls:** 1 LLM call (chat completion via `LLM_BASE_URL`/`LLM_MODEL`) + 0–6 Linear reads (auto-introspect, skipped if cached)
 
 ### validate-plan
@@ -182,7 +187,9 @@ If `LINEAR_API_KEY` is set and workspace context isn't already cached, this tool
 Check a plan for structural issues before creating anything. No external calls — pure logic.
 
 **Input:** `{ plan_id }` or `{ plan }` (inline plan object), plus optional `complexity` and `preferences` (affects scale-check warnings)
+
 **Returns:** `{ valid, errors, warnings }`
+
 **API calls:** none
 
 Checks for: circular dependencies, orphaned dependency references, undefined milestones, empty epics, duplicate titles, oversized epics (>12 issues), high estimates (>5 points).
@@ -201,6 +208,7 @@ Create a complete Linear project from a plan. Validates the plan first; if valid
 | `dry_run` | boolean | no                  | `false` |
 
 **Returns:** `{ project_id, milestone_ids, label_ids, epic_ids, issue_ids, dependency_count }` (when `dry_run: false`). When `dry_run: true`, returns `{ valid, errors, warnings }` (the validation result).
+
 **API calls:** 1 Linear read (project name check for idempotency) + N Linear writes, specifically:
 
 - 1 `createProject`
@@ -216,7 +224,9 @@ Labels that already exist on the team (matched by name from workspace cache) are
 Add a single epic (parent issue with children) to an existing project.
 
 **Input:** `{ project_id, team_id, epic, milestone_id?, label_ids? }`
+
 **Returns:** `{ epic_id, issue_ids }`
+
 **API calls:** 1 Linear read (project issues for idempotency check) + N Linear writes (1 epic issue + 1 per child issue + 1 per dependency)
 
 ### generate-and-bootstrap
@@ -224,7 +234,9 @@ Add a single epic (parent issue with children) to an existing project.
 Compound tool — generates a plan, validates it, and creates everything in Linear in one call. Combines `generate-plan` + `validate-plan` + `bootstrap-project` internally. Best for when you don't need to review the plan before execution.
 
 **Input:** Same as `generate-plan` plus `dry_run` (boolean, default `false`)
+
 **Returns:** `{ plan_id, summary, validation, bootstrap? }` — bootstrap is omitted if validation fails or `dry_run` is true
+
 **API calls:** 1 LLM call + 0–6 Linear reads (introspect) + 1 Linear read (idempotency) + N Linear writes (all resources)
 
 ## Workflow
