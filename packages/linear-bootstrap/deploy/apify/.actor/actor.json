@@ -2,30 +2,9 @@
   "actorSpecification": 1,
   "name": "linear-bootstrap",
   "title": "Linear Bootstrap MCP Server",
-  "description": "MCP server that bootstraps Linear projects from natural language descriptions",
-  "version": "0.1.0",
+  "description": "MCP server that bootstraps Linear projects from natural language descriptions. Exposes 7 tools via the Model Context Protocol.",
+  "version": "0.1.2",
   "dockerfile": "../Dockerfile",
   "input": "./input_schema.json",
-  "storages": {
-    "dataset": {
-      "actorSpecification": 1,
-      "title": "Bootstrap results",
-      "views": {
-        "overview": {
-          "title": "Overview",
-          "transformation": {
-            "fields": ["projectUrl", "issueCount", "epicCount"]
-          },
-          "display": {
-            "component": "table",
-            "properties": {
-              "projectUrl": { "label": "Project URL", "format": "text" },
-              "issueCount": { "label": "Issues", "format": "number" },
-              "epicCount": { "label": "Epics", "format": "number" }
-            }
-          }
-        }
-      }
-    }
-  }
+  "webServerSchema": "./openapi.json"
 }

@@ -64,7 +64,7 @@ export async function generatePlanCore(
   const model = process.env.LLM_MODEL;
   if (!model) {
     throw new ExternalServiceError(
-      "LLM_MODEL environment variable is required (e.g. anthropic/claude-sonnet-4)",
+      "LLM_MODEL environment variable is required (e.g. anthropic/claude-sonnet-4.6)",
       "llm",
     );
   }
