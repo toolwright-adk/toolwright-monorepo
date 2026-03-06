@@ -3,7 +3,7 @@
   "name": "linear-bootstrap",
   "title": "Linear Bootstrap MCP Server",
   "description": "MCP server that bootstraps Linear projects from natural language descriptions. Exposes 7 tools via the Model Context Protocol.",
-  "version": "0.1.2",
+  "version": "0.1.4",
   "dockerfile": "../Dockerfile",
   "input": "./input_schema.json",
   "webServerSchema": "./openapi.json",

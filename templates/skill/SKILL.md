@@ -6,6 +6,7 @@ metadata:
   author: toolwright-adk
   version: 0.1.0
   tags: []
+  internal: true
 compatibility:
   mcpServers:
     - "{{companion-mcp-server}}"

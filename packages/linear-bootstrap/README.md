@@ -55,10 +55,17 @@ Add to your MCP client config (Claude Code, Cursor, Windsurf, etc.):
 
 ### 2. Install the Agent Skill (optional)
 
-Install the included [Agent Skill](https://agentskills.io) to get a `/linear-bootstrap` slash command. The skill file ships with the npm package:
+The included [Agent Skill](https://skills.sh/toolwright-adk/toolwright-monorepo) gives your agent a `/linear-bootstrap` slash command with step-by-step instructions for team selection, plan review, and project creation.
+
+**One-command install** (recommended — works with Claude Code, Cursor, Gemini CLI, Goose, OpenCode, and more):
 
 ```bash
-# Install the package, then copy the skill
+npx skills add toolwright-adk/toolwright-monorepo --skill linear-bootstrap
+```
+
+**Manual install** (if you prefer):
+
+```bash
 npm install @toolwright-adk/linear-bootstrap
 cp -r node_modules/@toolwright-adk/linear-bootstrap/.claude/skills/linear-bootstrap .claude/skills/
 ```
