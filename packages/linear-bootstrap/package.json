@@ -33,7 +33,8 @@
     "linear-bootstrap": "dist/cli.js"
   },
   "files": [
-    "dist"
+    "dist",
+    ".claude"
   ],
   "publishConfig": {
     "access": "public"

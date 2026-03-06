@@ -2,34 +2,50 @@
 
 Agent Development Kit for production MCP servers and companion Skills. Orchestration-first tools that ship with workflow knowledge, not just API connectivity.
 
-## Monorepo Structure
-
-```
-toolwright-monorepo/
-├── packages/           # Published packages
-│   └── shared/         # @toolwright-adk/shared — validation, errors, output, testing
-├── templates/          # Scaffolding for new packages
-│   ├── mcp-server/     # Platform-agnostic MCP server template
-│   ├── apify-actor/    # Apify Actor deployment template
-│   └── skill/          # Agent Skill template
-└── docs/               # Project documentation
-    └── QUALITY-RUBRIC.md
-```
-
 ## Packages
 
-| Package                            | Description                                                              | Status  |
-| ---------------------------------- | ------------------------------------------------------------------------ | ------- |
-| `@toolwright-adk/shared`           | Shared validation, error handling, output formatting, and test utilities | Active  |
-| `@toolwright-adk/linear-bootstrap` | Linear project bootstrapping MCP server                                  | Planned |
+| Package                                                         | Version                                                                                                                                 | Description                                                        |
+| --------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------ |
+| [`@toolwright-adk/shared`](packages/shared)                     | [![npm](https://img.shields.io/npm/v/@toolwright-adk/shared)](https://www.npmjs.com/package/@toolwright-adk/shared)                     | Validation, errors, logging, output formatting, and test utilities |
+| [`@toolwright-adk/linear-bootstrap`](packages/linear-bootstrap) | [![npm](https://img.shields.io/npm/v/@toolwright-adk/linear-bootstrap)](https://www.npmjs.com/package/@toolwright-adk/linear-bootstrap) | MCP server for bootstrapping Linear projects from natural language |
 
-## Getting Started
+## Quick Start
 
 ```bash
+git clone https://github.com/toolwright-adk/toolwright-monorepo.git
+cd toolwright-monorepo
 pnpm install
 pnpm build
 pnpm test
 ```
+
+To use the Linear Bootstrap MCP server without cloning, see the [linear-bootstrap README](packages/linear-bootstrap).
+
+## Monorepo Structure
+
+```
+toolwright-monorepo/
+├── packages/
+│   ├── shared/             # @toolwright-adk/shared
+│   └── linear-bootstrap/   # @toolwright-adk/linear-bootstrap
+├── templates/              # Scaffolding for new packages
+│   ├── mcp-server/
+│   ├── apify-actor/
+│   └── skill/
+└── docs/
+    └── QUALITY-RUBRIC.md
+```
+
+## Development
+
+```bash
+pnpm build          # build all packages
+pnpm test           # run all tests
+pnpm lint           # ESLint
+pnpm format:check   # Prettier check
+```
+
+See [CONTRIBUTING.md](CONTRIBUTING.md) for the full contributor guide.
 
 ## Standards
 

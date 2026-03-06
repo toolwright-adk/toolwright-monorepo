@@ -66,7 +66,7 @@ export async function bootstrapProject(
 
   if (dry_run) {
     const validationResult = validatePlan(plan);
-    return success(validationResult);
+    return success({ ...validationResult, plan });
   }
 
   const validation = validatePlan(plan);
@@ -105,11 +105,15 @@ export async function bootstrapProject(
       );
     }
 
-    // Create project
+    // Create project — Linear enforces a 255-char limit on project descriptions
+    const description =
+      plan.project.description && plan.project.description.length > 255
+        ? plan.project.description.slice(0, 252) + "..."
+        : plan.project.description;
     const project = await client.createProject({
       name: plan.project.name,
       teamIds: [team_id],
-      description: plan.project.description,
+      description,
       targetDate: plan.project.target_date,
     });
     completed.push(`project:${project.id}`);
