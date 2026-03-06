@@ -19,5 +19,8 @@ docs/internal/
 # Pack tarballs
 *.tgz
 
+# MCP Registry tokens
+.mcpregistry_*
+
 # Beads issue tracking
 .beads/

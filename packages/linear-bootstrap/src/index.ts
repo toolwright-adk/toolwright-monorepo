@@ -1,4 +1,6 @@
 export { createServer } from "./server.js";
+export { createHttpApp, startHttpServer } from "./http.js";
+export type { HttpServerOptions } from "./http.js";
 export { generatePlanCore as generatePlan } from "./tools/generate-plan.js";
 export { validatePlan } from "./tools/validate-plan.js";
 export { bootstrapProject } from "./tools/bootstrap-project.js";
