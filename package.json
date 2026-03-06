@@ -13,6 +13,8 @@
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "clean": "pnpm -r clean",
+    "publish:all": "pnpm --filter @toolwright-adk/shared publish --access public && pnpm --filter @toolwright-adk/linear-bootstrap publish --access public",
+    "publish:dry": "pnpm --filter @toolwright-adk/shared publish --access public --dry-run && pnpm --filter @toolwright-adk/linear-bootstrap publish --access public --dry-run",
     "prepare": "husky"
   },
   "engines": {
