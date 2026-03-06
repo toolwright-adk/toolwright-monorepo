@@ -4,8 +4,11 @@ Describe a project in plain language, get a fully structured Linear project — 
 
 The server reads your team's existing conventions (workflow states, labels, cycles) and generates plans that fit how your team already works. Existing labels are reused, not duplicated. Issues start in your team's default state. Project names avoid collisions with active work.
 
+![linear-bootstrap demo](https://raw.githubusercontent.com/toolwright-adk/toolwright-monorepo/main/docs/linear-bootstrap/linear-bootstrap-demo.gif)
+
 ## Contents
 
+- [Example](#example)
 - [Quick Start](#quick-start)
 - [What It Does](#what-it-does)
 - [How It Works](#how-it-works)
@@ -18,6 +21,14 @@ The server reads your team's existing conventions (workflow states, labels, cycl
 - [Known Limitations](#known-limitations)
 - [Development](#development)
 - [License](#license)
+
+## Example
+
+> _"Set up a Linear project for building a todo CLI app. Show me the plan with 3 epics before creating it."_
+
+The agent introspects your team's workspace, generates a structured plan, and creates everything in Linear:
+
+![Linear dashboard after bootstrap](https://raw.githubusercontent.com/toolwright-adk/toolwright-monorepo/main/docs/linear-bootstrap/linear-bootstrap-result.png)
 
 ## Quick Start
 
@@ -80,7 +91,7 @@ Creates all of this in Linear:
 
 - **Project** with description
 - **Milestones** (e.g. Spec & design → MVP → Launch → Polish)
-- **Epics** as parent issues, each wired to a milestone
+- **Epics** as parent issues (Linear doesn't have a dedicated epic type — these are regular issues with children), each wired to a milestone
 - **Issues** with labels, priorities, and descriptions
 - **Dependencies** between issues (blocks/blocked-by)
 - **Labels** reused from your team when they exist, created only when new
@@ -202,7 +213,7 @@ Labels that already exist on the team (matched by name from workspace cache) are
 
 ### add-epic
 
-Add a single epic with child issues to an existing project.
+Add a single epic (parent issue with children) to an existing project.
 
 **Input:** `{ project_id, team_id, epic, milestone_id?, label_ids? }`
 **Returns:** `{ epic_id, issue_ids }`
