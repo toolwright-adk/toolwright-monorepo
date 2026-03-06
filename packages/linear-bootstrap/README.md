@@ -25,14 +25,12 @@ The server reads your team's existing conventions (workflow states, labels, cycl
 
 Add to your MCP client config (Claude Code, Cursor, Windsurf, etc.):
 
-> **Note:** `npx @toolwright-adk/linear-bootstrap` will work after the first npm publish. For now, use a local checkout.
-
 ```json
 {
   "mcpServers": {
     "linear-bootstrap": {
-      "command": "node",
-      "args": ["/path/to/linear-bootstrap/dist/cli.js"],
+      "command": "npx",
+      "args": ["-y", "@toolwright-adk/linear-bootstrap"],
       "env": {
         "LINEAR_API_KEY": "lin_api_...",
         "LLM_API_KEY": "...",
@@ -46,13 +44,12 @@ Add to your MCP client config (Claude Code, Cursor, Windsurf, etc.):
 
 ### 2. Install the Agent Skill (optional)
 
-Install the included [Agent Skill](https://agentskills.io) to get a `/linear-bootstrap` slash command. The skill file is at `.claude/skills/linear-bootstrap/SKILL.md` — copy it to wherever your agent looks for skills:
+Install the included [Agent Skill](https://agentskills.io) to get a `/linear-bootstrap` slash command. The skill file ships with the npm package:
 
 ```bash
-# Claude Code
-cp -r /path/to/linear-bootstrap/.claude/skills/linear-bootstrap .claude/skills/
-
-# Other agents — copy the SKILL.md to your agent's skill/command directory
+# Install the package, then copy the skill
+npm install @toolwright-adk/linear-bootstrap
+cp -r node_modules/@toolwright-adk/linear-bootstrap/.claude/skills/linear-bootstrap .claude/skills/
 ```
 
 The skill works with any agent that supports the Agent Skills format. It's tool-agnostic — it describes _what_ needs to happen (find team, generate plan, validate, create), not which specific tool to call. Any agent with the MCP server connected will have the right tools available.
@@ -244,7 +241,7 @@ The Quick Start config works with any stdio-compatible MCP client. Client-specif
 For generic stdio clients:
 
 ```bash
-LINEAR_API_KEY=... LLM_API_KEY=... LLM_BASE_URL=... LLM_MODEL=... node dist/cli.js
+LINEAR_API_KEY=... LLM_API_KEY=... LLM_BASE_URL=... LLM_MODEL=... npx -y @toolwright-adk/linear-bootstrap
 ```
 
 ## Security
@@ -266,7 +263,7 @@ No credentials are logged or cached to disk. Plan and workspace caches are in-me
 
 ## SDK Usage
 
-The package also exports core functions for programmatic use (available after npm publish):
+The package also exports core functions for programmatic use:
 
 ```typescript
 import { createServer } from "@toolwright-adk/linear-bootstrap";
