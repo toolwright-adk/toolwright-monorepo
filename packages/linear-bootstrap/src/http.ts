@@ -17,23 +17,34 @@ export function createHttpApp(options?: HttpServerOptions): Express {
   const mcpPath = options?.mcpPath ?? "/mcp";
 
   const app = express();
-  app.use(express.json());
+  app.use(express.json({ limit: "1mb" }));
 
   app.get("/health", (_req, res) => {
     res.json({ status: "ok" });
   });
 
-  app.post(mcpPath, async (req, res) => {
+  app.all(mcpPath, async (req, res) => {
     const server = createServer();
     const transport = new StreamableHTTPServerTransport({
       sessionIdGenerator: undefined,
     });
-    await server.connect(transport);
-    await transport.handleRequest(req, res, req.body);
-    res.on("close", () => {
-      transport.close();
-      server.close();
-    });
+    try {
+      await server.connect(transport);
+      await transport.handleRequest(req, res, req.body);
+    } catch {
+      if (!res.headersSent) {
+        res.status(500).json({
+          jsonrpc: "2.0",
+          error: { code: -32603, message: "Internal server error" },
+          id: null,
+        });
+      }
+    } finally {
+      res.on("close", () => {
+        transport.close().catch(() => {});
+        server.close().catch(() => {});
+      });
+    }
   });
 
   return app;
@@ -43,7 +54,13 @@ export function createHttpApp(options?: HttpServerOptions): Express {
  * Creates and starts an HTTP MCP server. Returns the listening server instance.
  */
 export function startHttpServer(options?: HttpServerOptions) {
-  const port = options?.port ?? parseInt(process.env.PORT ?? "3000");
+  const rawPort = options?.port ?? parseInt(process.env.PORT ?? "3000");
+  if (isNaN(rawPort) || rawPort < 1 || rawPort > 65535) {
+    throw new Error(
+      `Invalid PORT: "${process.env.PORT}". Must be a number between 1 and 65535.`,
+    );
+  }
+  const port = rawPort;
   const app = createHttpApp(options);
   const server = app.listen(port, () => {
     console.error(`Linear Bootstrap MCP server listening on port ${port}`);
