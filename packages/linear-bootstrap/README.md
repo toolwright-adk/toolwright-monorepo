@@ -1,5 +1,7 @@
 # linear-bootstrap
 
+[![npm](https://img.shields.io/npm/v/@toolwright-adk/linear-bootstrap)](https://www.npmjs.com/package/@toolwright-adk/linear-bootstrap) [![MCP Registry](https://img.shields.io/badge/MCP_Registry-listed-blue)](https://registry.modelcontextprotocol.io) [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://github.com/toolwright-adk/toolwright-monorepo/blob/main/LICENSE)
+
 Describe a project in plain language, get a fully structured Linear project — milestones, epics, issues, labels, and dependency chains.
 
 The server reads your team's existing conventions (workflow states, labels, cycles) and generates plans that fit how your team already works. Existing labels are reused, not duplicated. Issues start in your team's default state. Project names avoid collisions with active work.
@@ -13,12 +15,13 @@ The server reads your team's existing conventions (workflow states, labels, cycl
 - [What It Does](#what-it-does)
 - [How It Works](#how-it-works)
 - [Project Archetypes](#project-archetypes)
-- [Environment Variables](#environment-variables)
+- [Environment Variables (self-hosted)](#environment-variables-self-hosted)
 - [Tools](#tools)
 - [Workflow](#workflow)
 - [Other MCP Clients](#other-mcp-clients)
 - [Security](#security)
 - [Known Limitations](#known-limitations)
+- [Programmatic Usage](#programmatic-usage)
 - [Development](#development)
 - [License](#license)
 
@@ -32,7 +35,7 @@ The agent introspects your team's workspace, generates a structured plan, and cr
 
 ## Quick Start
 
-### 1. Add the MCP server
+### Option A: Self-hosted (BYOK)
 
 Add to your MCP client config (Claude Code, Cursor, Windsurf, etc.):
 
@@ -53,7 +56,11 @@ Add to your MCP client config (Claude Code, Cursor, Windsurf, etc.):
 }
 ```
 
-### 2. Install the Agent Skill (optional)
+### Option B: Hosted on Apify
+
+No LLM keys needed — just your Linear API key. Available as a [managed MCP server on Apify](https://apify.com/toolwright/linear-bootstrap-mcp) with pay-per-event pricing ($0.35 per project bootstrap).
+
+### Install the Agent Skill (optional)
 
 The included [Agent Skill](https://skills.sh/toolwright-adk/toolwright-monorepo) gives your agent a `/linear-bootstrap` slash command with step-by-step instructions for team selection, plan review, and project creation.
 
@@ -72,7 +79,7 @@ cp -r node_modules/@toolwright-adk/linear-bootstrap/.claude/skills/linear-bootst
 
 The skill works with any agent that supports the Agent Skills format. It's tool-agnostic — it describes _what_ needs to happen (find team, generate plan, validate, create), not which specific tool to call. Any agent with the MCP server connected will have the right tools available.
 
-### 3. Use it
+### Use it
 
 ```
 /linear-bootstrap CLI tool for managing database migrations
@@ -126,7 +133,9 @@ The `project_type` parameter tailors the plan structure:
 | `api`               | Public or internal API development | API design sign-off → Implementation → GA       |
 | `migration`         | Moving between systems             | Dual-write → Backfill → Cutover → Decommission  |
 
-## Environment Variables
+## Environment Variables (self-hosted)
+
+These apply to [Option A](#option-a-self-hosted-byok). The [Apify hosted version](https://apify.com/toolwright/linear-bootstrap-mcp) only requires a Linear API key.
 
 | Variable         | Required | Description                                                         |
 | ---------------- | -------- | ------------------------------------------------------------------- |
@@ -276,10 +285,10 @@ LINEAR_API_KEY=... LLM_API_KEY=... LLM_BASE_URL=... LLM_MODEL=... npx -y @toolwr
 
 ## Security
 
-The server needs two sets of credentials:
+When self-hosted, the server needs two sets of credentials:
 
 - **Linear API key** — used to read team conventions and create projects. Scoped to one workspace; the key determines which teams are accessible. Create a key with the minimum permissions your workflow needs at [linear.app/settings/api](https://linear.app/settings/api).
-- **LLM API key** — your project description is sent to whichever LLM provider you configure via `LLM_BASE_URL`. No Linear data (issues, comments, user info) is sent to the LLM — only the project description you provide, plus a summary of team labels, workflow states, and project names used to avoid duplicates.
+- **LLM API key** (self-hosted only) — your project description is sent to whichever LLM provider you configure via `LLM_BASE_URL`. No Linear data (issues, comments, user info) is sent to the LLM — only the project description you provide, plus a summary of team labels, workflow states, and project names used to avoid duplicates.
 
 No credentials are logged or cached to disk. Plan and workspace caches are in-memory only and cleared on server restart.
 
@@ -291,7 +300,7 @@ No credentials are logged or cached to disk. Plan and workspace caches are in-me
 - **No import** — this server creates new Linear projects; it doesn't import from Jira, GitHub Projects, Asana, etc.
 - **LLM quality** — plan quality depends on your model. Larger models (Claude Sonnet, GPT-4o, Llama 3 70B) produce better-structured plans than smaller ones.
 
-## SDK Usage
+## Programmatic Usage
 
 The package also exports core functions for programmatic use:
 
@@ -331,4 +340,4 @@ pnpm lint     # type-check
 
 ## License
 
-[MIT](../../LICENSE) — see the repository root.
+[MIT](https://github.com/toolwright-adk/toolwright-monorepo/blob/main/LICENSE)

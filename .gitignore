@@ -22,5 +22,8 @@ docs/internal/
 # MCP Registry tokens
 .mcpregistry_*
 
+# Smithery build artifacts
+.smithery/
+
 # Beads issue tracking
 .beads/
