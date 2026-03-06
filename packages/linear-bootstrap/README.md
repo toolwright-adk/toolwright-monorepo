@@ -286,7 +286,7 @@ No credentials are logged or cached to disk. Plan and workspace caches are in-me
 ## Known Limitations
 
 - **One workspace per server instance** — the `LINEAR_API_KEY` determines the workspace. To work across workspaces, run separate server instances.
-- **In-memory caches** — plan and workspace caches don't survive server restarts. A previously returned `plan_id` becomes invalid after restart.
+- **In-memory caches** — plan and workspace caches are process-local and don't survive restarts. A `plan_id` is only valid within the same process for 30 minutes. Under horizontal scaling, use `generate-and-bootstrap` (single request) or pass inline `plan` objects instead of `plan_id` references.
 - **Custom fields** — the schema supports them, but the Linear SDK (v37) doesn't expose custom field definitions. The `custom_fields` array is always empty.
 - **No import** — this server creates new Linear projects; it doesn't import from Jira, GitHub Projects, Asana, etc.
 - **LLM quality** — plan quality depends on your model. Larger models (Claude Sonnet, GPT-4o, Llama 3 70B) produce better-structured plans than smaller ones.

@@ -2,6 +2,12 @@ import { randomUUID } from "node:crypto";
 import { PlanValidationError } from "@toolwright-adk/shared";
 import type { Plan } from "./types.js";
 
+/**
+ * In-memory plan cache. Process-local — plan_id references are only valid
+ * within the same process and expire after 30 minutes. Under horizontal
+ * scaling or multi-process deployments, use generate-and-bootstrap (single
+ * request) or pass inline plan objects instead of plan_id references.
+ */
 const cache = new Map<string, { plan: Plan; expiresAt: number }>();
 const TTL_MS = 30 * 60 * 1000; // 30 minutes
 const MAX_ENTRIES = 50;
