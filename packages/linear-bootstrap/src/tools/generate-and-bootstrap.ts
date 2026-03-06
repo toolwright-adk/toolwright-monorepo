@@ -11,6 +11,7 @@ import { storePlan } from "../plan-cache.js";
 import {
   GenerateAndBootstrapInputSchema,
   type GenerateAndBootstrapInput,
+  type Plan,
   type PlanSummary,
   type PlanValidationResult,
   type BootstrapResult,
@@ -20,6 +21,7 @@ interface GenerateAndBootstrapResult {
   plan_id: string;
   summary: PlanSummary;
   validation: PlanValidationResult;
+  plan?: Plan;
   bootstrap?: BootstrapResult;
 }
 
@@ -41,7 +43,7 @@ export async function generateAndBootstrap(
   const validation = validatePlan(plan, args.preferences, args.complexity);
 
   if (!validation.valid || args.dry_run) {
-    return success({ plan_id: planId, summary, validation });
+    return success({ plan_id: planId, summary, validation, plan });
   }
 
   // Step 3: Bootstrap — validation already passed above, so bootstrapProject
