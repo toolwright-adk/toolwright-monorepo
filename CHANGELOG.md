@@ -5,6 +5,22 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.1.3] - 2026-03-06
+
+### Added
+
+- `@toolwright-adk/linear-bootstrap` — `mcpName` field for MCP Registry verification
+- `server.json` for MCP Registry publishing
+- Apify actor listing README, OpenAPI schema, and simplified input (LINEAR_API_KEY only)
+- Demo GIF and screenshot in docs and READMEs
+
+### Changed
+
+- SKILL.md version bumped to 0.1.2
+- Fixed model reference in generate-plan error message (claude-sonnet-4.6)
+- Removed "in seconds" claim from linear-bootstrap README
+- Fixed README tool docs formatting (blank lines between Input/Returns/API calls)
+
 ## [0.1.2] - 2026-03-05
 
 ### Fixed
