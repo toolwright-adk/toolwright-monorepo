@@ -8,7 +8,7 @@
     "start": "node dist/main.js"
   },
   "dependencies": {
-    "@toolwright-adk/linear-bootstrap": "^0.1.3",
+    "@toolwright-adk/linear-bootstrap": "^0.1.4",
     "apify": "^3.0.0"
   },
   "devDependencies": {

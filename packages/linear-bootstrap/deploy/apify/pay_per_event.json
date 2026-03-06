@@ -1,0 +1,45 @@
+{
+  "$comment": "Source of truth for Apify PPE pricing. Must be configured manually in the Apify Console — there is no auto-import from this file.",
+  "events": [
+    {
+      "name": "generate-plan",
+      "title": "Generate Plan",
+      "price": 0.1,
+      "notes": "LLM call for plan generation"
+    },
+    {
+      "name": "bootstrap-project",
+      "title": "Bootstrap Project",
+      "price": 0.25,
+      "notes": "Creates everything in Linear"
+    },
+    {
+      "name": "add-epic",
+      "title": "Add Epic",
+      "price": 0.1,
+      "notes": "Adds epic + issues to existing project"
+    },
+    {
+      "name": "generate-and-bootstrap",
+      "title": "Generate and Bootstrap",
+      "price": 0.35,
+      "notes": "Compound: generate + validate + create"
+    },
+    {
+      "name": "list-teams",
+      "price": 0,
+      "notes": "No charge"
+    },
+    {
+      "name": "introspect-workspace",
+      "price": 0,
+      "notes": "No charge"
+    },
+    {
+      "name": "validate-plan",
+      "price": 0,
+      "notes": "No charge"
+    }
+  ],
+  "primaryEvent": "generate-and-bootstrap"
+}
