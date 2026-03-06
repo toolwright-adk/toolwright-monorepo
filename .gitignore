@@ -16,5 +16,8 @@ docs/internal/
 .dolt/
 *.db
 
+# Pack tarballs
+*.tgz
+
 # Beads issue tracking
 .beads/
