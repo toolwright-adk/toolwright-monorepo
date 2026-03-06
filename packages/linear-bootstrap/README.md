@@ -7,7 +7,6 @@ The server reads your team's existing conventions (workflow states, labels, cycl
 ## Contents
 
 - [Quick Start](#quick-start)
-- [Examples](#examples)
 - [What It Does](#what-it-does)
 - [How It Works](#how-it-works)
 - [Project Archetypes](#project-archetypes)
@@ -26,24 +25,7 @@ The server reads your team's existing conventions (workflow states, labels, cycl
 
 Add to your MCP client config (Claude Code, Cursor, Windsurf, etc.):
 
-```json
-{
-  "mcpServers": {
-    "linear-bootstrap": {
-      "command": "npx",
-      "args": ["-y", "@toolwright-adk/linear-bootstrap"],
-      "env": {
-        "LINEAR_API_KEY": "lin_api_...",
-        "LLM_API_KEY": "...",
-        "LLM_BASE_URL": "https://openrouter.ai/api/v1",
-        "LLM_MODEL": "anthropic/claude-sonnet-4"
-      }
-    }
-  }
-}
-```
-
-Or if you prefer a local checkout:
+> **Note:** `npx @toolwright-adk/linear-bootstrap` will work after the first npm publish. For now, use a local checkout.
 
 ```json
 {
@@ -84,50 +66,6 @@ The skill works with any agent that supports the Agent Skills format. It's tool-
 The skill walks you through team selection, plan review, and project creation interactively. Say "just do it" to skip the review step.
 
 The skill is optional — you can also direct your agent to use the tools directly or according to your own agent guidelines. For example: _"Bootstrap a Linear project for building a Slack integration."_
-
-## Examples
-
-<!-- Screenshots or GIFs can be added alongside each example -->
-
-### Interactive — review before creating
-
-```
-You:   /linear-bootstrap CLI tool for managing database migrations
-
-Agent: Found team "Engineering" (ENG). I'll generate a migration project plan...
-
-       Plan ready: 4 milestones, 5 epics, 18 issues, ~32 points.
-       Does this look right, or should I adjust the scope?
-
-You:   Looks good, go ahead.
-
-Agent: Created "Database Migration CLI" in Linear:
-       - 4 milestones (Inventory & plan → Cutover)
-       - 5 epics, 18 issues, 12 dependencies
-       - Reused 6 existing labels, created 1 new
-```
-
-### One-shot — skip the review
-
-```
-You:   /linear-bootstrap just do it — webhook subscriptions API
-
-Agent: Created "Webhook Subscriptions API" in Linear:
-       - 4 milestones (API design → GA), 5 epics, 18 issues
-       - 12 dependencies, 6 labels reused
-```
-
-### Infrastructure project
-
-```
-You:   /linear-bootstrap shared logging library for the monorepo, infrastructure type
-
-Agent: Found team "Platform" (PLT). Generating an infrastructure project plan...
-
-       Plan ready: 2 milestones (Core library ready → Org-wide adoption),
-       4 epics, 14 issues.
-       Proceed?
-```
 
 ## What It Does
 
@@ -328,11 +266,7 @@ No credentials are logged or cached to disk. Plan and workspace caches are in-me
 
 ## SDK Usage
 
-The package also exports core functions for programmatic use:
-
-```bash
-npm install @toolwright-adk/linear-bootstrap
-```
+The package also exports core functions for programmatic use (available after npm publish):
 
 ```typescript
 import { createServer } from "@toolwright-adk/linear-bootstrap";
