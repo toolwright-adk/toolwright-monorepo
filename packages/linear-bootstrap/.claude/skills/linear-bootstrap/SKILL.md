@@ -8,7 +8,7 @@ description: |
 license: MIT
 metadata:
   author: toolwright-adk
-  version: "0.1.2"
+  version: "0.1.4"
 compatibility: Requires the linear-bootstrap MCP server with LINEAR_API_KEY, LLM_API_KEY, LLM_BASE_URL, and LLM_MODEL configured.
 ---
 

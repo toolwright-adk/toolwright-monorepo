@@ -6,6 +6,24 @@ Describe a project in plain language, get a fully structured Linear project — 
 
 The server reads your team's existing conventions (workflow states, labels, cycles) and generates plans that fit how your team already works. Existing labels are reused, not duplicated. Issues start in your team's default state. Project names avoid collisions with active work.
 
+## Pricing
+
+Pay per tool call. Read-only tools are free.
+
+| Tool call                | Cost  | What happens                                |
+| ------------------------ | ----- | ------------------------------------------- |
+| `generate-and-bootstrap` | $0.35 | Generate plan + validate + create in Linear |
+| `bootstrap-project`      | $0.25 | Create everything in Linear from a plan     |
+| `generate-plan`          | $0.10 | LLM call for plan generation                |
+| `add-epic`               | $0.10 | Add epic + issues to existing project       |
+| `list-teams`             | free  | List your Linear teams                      |
+| `introspect-workspace`   | free  | Read team conventions                       |
+| `validate-plan`          | free  | Check plan for structural issues            |
+
+A typical project bootstrap costs **$0.35** (one `generate-and-bootstrap` call). The step-by-step workflow (`generate-plan` → `validate-plan` → `bootstrap-project`) costs the same: $0.10 + free + $0.25 = $0.35.
+
+LLM costs are included — the server handles plan generation internally using Anthropic models. You only provide your Linear API key.
+
 ## What It Does
 
 One tool call like this:
