@@ -6,14 +6,8 @@ import { createServer } from "@toolwright-adk/linear-bootstrap";
 await Actor.init();
 
 const input = (await Actor.getInput()) as Record<string, string> | null;
-if (input) {
-  for (const [key, value] of Object.entries(input)) {
-    if (value && process.env[key]) {
-      console.log(`Skipping input "${key}": already set in environment`);
-    } else if (value) {
-      process.env[key] = value;
-    }
-  }
+if (input?.LINEAR_API_KEY) {
+  process.env.LINEAR_API_KEY = input.LINEAR_API_KEY;
 }
 
 const app = express();

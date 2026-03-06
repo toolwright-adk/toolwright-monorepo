@@ -1,37 +1,16 @@
 {
   "title": "Linear Bootstrap MCP Server",
-  "description": "Configuration for the Linear Bootstrap MCP server running as an Apify actor",
+  "description": "MCP server for bootstrapping Linear projects from natural language. Provide your Linear API key to get started.",
   "type": "object",
   "schemaVersion": 1,
   "properties": {
     "LINEAR_API_KEY": {
       "title": "Linear API Key",
       "type": "string",
-      "description": "API key for accessing the Linear API",
+      "description": "API key for accessing the Linear API. Create one at linear.app/settings/api",
       "editor": "textfield",
       "isSecret": true
-    },
-    "LLM_API_KEY": {
-      "title": "LLM API Key",
-      "type": "string",
-      "description": "API key for the LLM provider (OpenAI-compatible)",
-      "editor": "textfield",
-      "isSecret": true
-    },
-    "LLM_BASE_URL": {
-      "title": "LLM Base URL",
-      "type": "string",
-      "description": "Base URL for the LLM API (OpenAI-compatible endpoint)",
-      "editor": "textfield",
-      "default": "https://api.openai.com/v1"
-    },
-    "LLM_MODEL": {
-      "title": "LLM Model",
-      "type": "string",
-      "description": "Model identifier for plan generation",
-      "editor": "textfield",
-      "default": "gpt-4o"
     }
   },
-  "required": ["LINEAR_API_KEY", "LLM_API_KEY"]
+  "required": ["LINEAR_API_KEY"]
 }
