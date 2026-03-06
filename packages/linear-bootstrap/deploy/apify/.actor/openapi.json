@@ -1,0 +1,51 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "Linear Bootstrap MCP Server",
+    "version": "0.1.2",
+    "description": "MCP server for bootstrapping Linear projects from natural language. Exposes 7 tools: list-teams, introspect-workspace, generate-plan, validate-plan, bootstrap-project, add-epic, and generate-and-bootstrap."
+  },
+  "paths": {
+    "/mcp": {
+      "post": {
+        "summary": "MCP request endpoint",
+        "description": "Accepts MCP protocol requests (JSON-RPC). Connect any MCP client to this endpoint.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "jsonrpc": { "type": "string", "const": "2.0" },
+                  "method": { "type": "string" },
+                  "params": { "type": "object" },
+                  "id": { "type": ["string", "number"] }
+                },
+                "required": ["jsonrpc", "method"]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "MCP response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "jsonrpc": { "type": "string", "const": "2.0" },
+                    "result": { "type": "object" },
+                    "error": { "type": "object" },
+                    "id": { "type": ["string", "number"] }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

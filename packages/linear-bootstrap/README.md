@@ -1,6 +1,6 @@
 # linear-bootstrap
 
-Describe a project in plain language, get a fully structured Linear project — milestones, epics, issues, labels, and dependency chains — created in seconds.
+Describe a project in plain language, get a fully structured Linear project — milestones, epics, issues, labels, and dependency chains.
 
 The server reads your team's existing conventions (workflow states, labels, cycles) and generates plans that fit how your team already works. Existing labels are reused, not duplicated. Issues start in your team's default state. Project names avoid collisions with active work.
 
