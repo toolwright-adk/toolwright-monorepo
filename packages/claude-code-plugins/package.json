@@ -1,0 +1,61 @@
+{
+  "name": "@toolwright-adk/claude-code-plugins",
+  "version": "0.1.0",
+  "description": "Claude Code plugins from Toolwright — skills and MCP server bundles",
+  "license": "MIT",
+  "type": "module",
+  "author": "Toolwright Contributors",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/toolwright-adk/toolwright-monorepo.git",
+    "directory": "packages/claude-code-plugins"
+  },
+  "homepage": "https://github.com/toolwright-adk/toolwright-monorepo/tree/main/packages/claude-code-plugins",
+  "bugs": {
+    "url": "https://github.com/toolwright-adk/toolwright-monorepo/issues"
+  },
+  "keywords": [
+    "claude-code",
+    "plugins",
+    "skills",
+    "mcp",
+    "toolwright"
+  ],
+  "bin": {
+    "toolwright-plugins": "dist/cli.js"
+  },
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    }
+  },
+  "files": [
+    "dist",
+    "skills",
+    "manifests"
+  ],
+  "publishConfig": {
+    "access": "public"
+  },
+  "scripts": {
+    "build": "tsup",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "clean": "rm -rf dist",
+    "lint": "tsc --noEmit",
+    "format:check": "prettier --check src/",
+    "prepublishOnly": "pnpm build"
+  },
+  "dependencies": {
+    "zod": "^3.23.0"
+  },
+  "devDependencies": {
+    "@types/node": "^25.3.3",
+    "tsup": "^8.0.0",
+    "typescript": "^5.5.0",
+    "vitest": "^2.0.0"
+  }
+}
