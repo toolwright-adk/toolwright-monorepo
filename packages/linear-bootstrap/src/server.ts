@@ -1,3 +1,4 @@
+import { createRequire } from "node:module";
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import type { CallToolResult } from "@modelcontextprotocol/sdk/types.js";
 import {
@@ -27,6 +28,8 @@ import { introspectWorkspace } from "./tools/introspect-workspace.js";
 import { listTeams } from "./tools/list-teams.js";
 
 const logger = createLogger("linear-bootstrap");
+const require = createRequire(import.meta.url);
+const pkg = require("../package.json") as { version: string };
 
 function handleToolError(err: unknown, toolName: string): CallToolResult {
   if (err instanceof ToolwrightError) {
@@ -44,7 +47,7 @@ function handleToolError(err: unknown, toolName: string): CallToolResult {
 export function createServer(): McpServer {
   const server = new McpServer({
     name: "linear-bootstrap",
-    version: "0.1.0",
+    version: pkg.version,
   });
 
   server.tool(
