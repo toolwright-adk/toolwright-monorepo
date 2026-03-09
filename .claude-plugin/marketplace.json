@@ -1,0 +1,37 @@
+{
+  "name": "toolwright-adk",
+  "owner": {
+    "name": "Toolwright Contributors",
+    "email": "https://github.com/toolwright-adk"
+  },
+  "metadata": {
+    "description": "Agent development toolkit — plugins for Linear project management, temporal awareness, and more",
+    "version": "1.0.0"
+  },
+  "plugins": [
+    {
+      "name": "linear-project-manager",
+      "source": {
+        "source": "git-subdir",
+        "url": "https://github.com/toolwright-adk/toolwright-monorepo.git",
+        "path": "packages/linear-project-manager",
+        "ref": "main"
+      },
+      "description": "Plan, bootstrap, and manage Linear projects using both linear-bootstrap and official Linear MCP tools together",
+      "version": "0.1.0",
+      "author": {
+        "name": "Toolwright Contributors"
+      },
+      "repository": "https://github.com/toolwright-adk/toolwright-monorepo",
+      "license": "MIT",
+      "keywords": [
+        "linear",
+        "project-management",
+        "planning",
+        "bootstrap",
+        "mcp"
+      ],
+      "category": "productivity"
+    }
+  ]
+}

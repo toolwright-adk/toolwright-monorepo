@@ -8,17 +8,5 @@
   },
   "repository": "https://github.com/toolwright-adk/toolwright-monorepo",
   "license": "MIT",
-  "keywords": ["linear", "project-management", "planning", "bootstrap", "mcp"],
-  "mcpServers": {
-    "linear-bootstrap": {
-      "command": "linear-bootstrap",
-      "args": [],
-      "env": {
-        "LINEAR_API_KEY": "",
-        "LLM_API_KEY": "",
-        "LLM_BASE_URL": "",
-        "LLM_MODEL": ""
-      }
-    }
-  }
+  "keywords": ["linear", "project-management", "planning", "bootstrap", "mcp"]
 }
