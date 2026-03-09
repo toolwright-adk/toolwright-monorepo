@@ -48,6 +48,10 @@ These rules are critical. Follow them strictly.
 
 ### For new projects:
 
+Delegate to the `linear-bootstrap` skill, which handles the full workflow (prerequisite check → team selection → plan generation → validation → creation). Only handle this directly if the user's request requires multi-step judgment that the skill can't provide (e.g., creating multiple related projects, or deciding between project types based on ambiguous requirements).
+
+If handling directly:
+
 1. Check prerequisites: call `list-teams` to verify the MCP server is running
 2. If multiple teams, ask which one to target
 3. Gather the project description from the user
