@@ -4,10 +4,12 @@ Agent Development Kit for production MCP servers and companion Skills. Orchestra
 
 ## Packages
 
-| Package                                                         | Version                                                                                                                                 | Description                                                        |
-| --------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------ |
-| [`@toolwright-adk/shared`](packages/shared)                     | [![npm](https://img.shields.io/npm/v/@toolwright-adk/shared)](https://www.npmjs.com/package/@toolwright-adk/shared)                     | Validation, errors, logging, output formatting, and test utilities |
-| [`@toolwright-adk/linear-bootstrap`](packages/linear-bootstrap) | [![npm](https://img.shields.io/npm/v/@toolwright-adk/linear-bootstrap)](https://www.npmjs.com/package/@toolwright-adk/linear-bootstrap) | MCP server for bootstrapping Linear projects from natural language |
+| Package                                                               | Version                                                                                                                                       | Description                                                        |
+| --------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------ |
+| [`@toolwright-adk/shared`](packages/shared)                           | [![npm](https://img.shields.io/npm/v/@toolwright-adk/shared)](https://www.npmjs.com/package/@toolwright-adk/shared)                           | Validation, errors, logging, output formatting, and test utilities |
+| [`@toolwright-adk/linear-bootstrap`](packages/linear-bootstrap)       | [![npm](https://img.shields.io/npm/v/@toolwright-adk/linear-bootstrap)](https://www.npmjs.com/package/@toolwright-adk/linear-bootstrap)       | MCP server for bootstrapping Linear projects from natural language |
+| [`linear-project-manager`](packages/linear-project-manager)           | Plugin                                                                                                                                        | Claude Code plugin — skills, agents, and commands for Linear       |
+| [`@toolwright-adk/claude-code-plugins`](packages/claude-code-plugins) | [![npm](https://img.shields.io/npm/v/@toolwright-adk/claude-code-plugins)](https://www.npmjs.com/package/@toolwright-adk/claude-code-plugins) | Plugin registry with manifests and standalone skills               |
 
 ## Quick Start
 
@@ -25,10 +27,14 @@ To use the Linear Bootstrap MCP server without cloning, see the [linear-bootstra
 
 ```
 toolwright-monorepo/
+├── .claude-plugin/
+│   └── marketplace.json        # Plugin marketplace for distribution
 ├── packages/
-│   ├── shared/             # @toolwright-adk/shared
-│   └── linear-bootstrap/   # @toolwright-adk/linear-bootstrap
-├── templates/              # Scaffolding for new packages
+│   ├── shared/                 # @toolwright-adk/shared
+│   ├── linear-bootstrap/       # @toolwright-adk/linear-bootstrap (MCP server)
+│   ├── linear-project-manager/ # Claude Code plugin (skills + agents + commands)
+│   └── claude-code-plugins/    # Plugin registry and standalone skills
+├── templates/                  # Scaffolding for new packages
 │   ├── mcp-server/
 │   ├── apify-actor/
 │   └── skill/

@@ -5,6 +5,34 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### Added
+
+- `linear-project-manager` — Claude Code plugin for Linear project management
+  - `/linear` command — routes to the right skill based on intent
+  - `/linear-check` command — probes both MCP servers and reports health
+  - `linear-planner` agent — tool selection heuristics (batch vs individual)
+  - `linear-ops` agent — day-to-day triage, status updates, cycle management
+  - `linear-bootstrap` skill (hardened) — prerequisite checks, error recovery, `allowed-tools`
+  - `linear-expand` skill — add epics to existing projects via `add-epic`
+  - `linear-status` skill — project health reports with optional Linear status posting
+- Cross-platform portability snippets for Cursor, Windsurf, Codex, Roo Code, and Cline
+- Plugin marketplace (`.claude-plugin/marketplace.json`) with `git-subdir` distribution
+- `@toolwright-adk/claude-code-plugins` — test suite (17 tests: manifest validation, skill integrity, MCP command safety)
+
+### Changed
+
+- `@toolwright-adk/linear-bootstrap` — enriched MCP tool descriptions with RECOMMENDED usage guidance
+- `@toolwright-adk/linear-bootstrap` — `createRequire` version reading wrapped in try/catch for bundled deployments
+- `@toolwright-adk/linear-bootstrap` — SKILL.md canonical source moved to linear-project-manager; prepack/postpack copies at publish time
+- `@toolwright-adk/linear-bootstrap` — reverted manifest MCP command to `npx -y` (bare binary only works locally)
+
+### Fixed
+
+- `linear-expand` and `linear-status` skills missing `mcp__linear__list_projects` in `allowed-tools`
+- Marketplace `owner.email` field was a URL (changed to `owner.url`)
+
 ## [0.1.4] - 2026-03-06
 
 ### Added
