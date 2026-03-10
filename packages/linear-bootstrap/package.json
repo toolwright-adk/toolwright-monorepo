@@ -52,7 +52,8 @@
     "clean": "rm -rf dist",
     "lint": "tsc --noEmit",
     "format:check": "prettier --check src/",
-    "prepublishOnly": "pnpm build"
+    "prepack": "pnpm build && cp -f ../linear-project-manager/skills/linear-bootstrap/SKILL.md .claude/skills/linear-bootstrap/SKILL.md",
+    "postpack": "rm -f .claude/skills/linear-bootstrap/SKILL.md"
   },
   "dependencies": {
     "@linear/sdk": "^37.0.0",

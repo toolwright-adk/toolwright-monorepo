@@ -1,1 +1,0 @@
-../../../../linear-project-manager/skills/linear-bootstrap/SKILL.md
