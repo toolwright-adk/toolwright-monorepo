@@ -137,6 +137,7 @@ No credentials are logged or cached to disk. Plan and workspace caches are in-me
 
 - **Open source:** Full source on [GitHub](https://github.com/toolwright-adk/toolwright-monorepo) — self-host with your own LLM and Linear keys. MIT licensed. Free forever.
 - **Agent Skill:** Ships with a SKILL.md for Claude Code, Cursor, Copilot, and any agent that supports the Agent Skills format.
+- **Plugin:** The [`linear-project-manager`](https://github.com/toolwright-adk/toolwright-monorepo/tree/main/packages/linear-project-manager) plugin adds skills, agents, and commands that teach your agent when to use `linear-bootstrap` vs the official Linear MCP — preventing anti-patterns like creating issues one-by-one. Available for Claude Code, with portability snippets for Cursor, Windsurf, Roo Code, and Cline.
 
 ## Built By
 
