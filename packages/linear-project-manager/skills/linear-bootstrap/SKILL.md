@@ -5,6 +5,8 @@ description: |
   wants to plan a project, set up a project in Linear, scaffold project milestones and issues,
   bootstrap a project plan, or create a structured project from a description. Also use when the
   user mentions creating epics, milestones, or issue hierarchies in Linear.
+argument-hint: "[project description]"
+allowed-tools: mcp__linear-bootstrap__list-teams, mcp__linear-bootstrap__introspect-workspace, mcp__linear-bootstrap__generate-plan, mcp__linear-bootstrap__validate-plan, mcp__linear-bootstrap__bootstrap-project, mcp__linear-bootstrap__generate-and-bootstrap, mcp__linear-bootstrap__add-epic
 license: MIT
 metadata:
   author: toolwright-adk
@@ -18,9 +20,24 @@ Create a fully structured Linear project — milestones, epics, issues, labels, 
 
 ## Workflow
 
+### 0. Verify prerequisites
+
+Before starting, confirm the linear-bootstrap MCP tools are available by checking that `mcp__linear-bootstrap__list-teams` is callable. Attempt to list teams.
+
+If the tool is not found or the call fails:
+
+> The linear-bootstrap MCP server is not running. To fix this:
+>
+> 1. Check `/plugin` for MCP server errors
+> 2. Verify the server is configured in `.mcp.json` with valid `LINEAR_API_KEY`, `LLM_API_KEY`, `LLM_BASE_URL`, and `LLM_MODEL`
+> 3. Try restarting Claude Code
+> 4. Test manually: `npx @toolwright-adk/linear-bootstrap` (or `bunx` if npx is broken)
+
+Stop here if the server is unavailable — do not attempt to proceed without it.
+
 ### 1. Identify the team
 
-List the available Linear teams. If there is only one, use it. If there are multiple, ask the user which team to target.
+Use the team list from the prerequisite check. If there is only one team, use it. If there are multiple, ask the user which team to target.
 
 The server automatically reads your team's existing labels, workflow states, and active projects before generating a plan. No extra step needed.
 
@@ -47,6 +64,12 @@ Generate a project plan using the description, team, project type, and complexit
 
 Show the user the summary. Ask: _"Does this look right, or should I adjust the scope?"_
 
+**If generation fails:** Report the error to the user. Common causes:
+
+- LLM API key invalid or expired — check `LLM_API_KEY`
+- LLM provider unreachable — check `LLM_BASE_URL`
+- Description too vague — ask the user to provide more detail
+
 ### 4. Validate the plan
 
 Validate the plan for structural issues (circular dependencies, orphaned references, etc.). If there are errors, report them and stop. If there are only warnings, show them and ask whether to proceed.
@@ -59,9 +82,13 @@ Create the project in Linear using the plan reference and team. Report what was 
 - Number of milestones, epics, issues, and dependencies
 - How many labels were reused vs. created new
 
+**If creation partially fails:** The server tracks what was created vs. what failed. Report both lists to the user. The successfully created items remain in Linear — do not retry the entire bootstrap. Instead, suggest using `add-epic` to fill in missing pieces, or fixing the issue in Linear directly.
+
+**If the project already exists:** The server detects this and returns the existing project ID without making changes. Report this to the user.
+
 ### One-shot mode
 
-If the user says "just do it," "don't ask," or otherwise indicates they want unattended creation, generate the plan and create the project in a single step without intermediate review.
+If the user says "just do it," "don't ask," or otherwise indicates they want unattended creation, use `generate-and-bootstrap` to generate the plan and create the project in a single step without intermediate review.
 
 ## Examples
 

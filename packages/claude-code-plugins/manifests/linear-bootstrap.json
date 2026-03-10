@@ -1,0 +1,19 @@
+{
+  "name": "linear-bootstrap",
+  "description": "Bootstrap Linear projects from natural language descriptions",
+  "package": "@toolwright-adk/linear-bootstrap",
+  "mcp": {
+    "command": "npx",
+    "args": ["-y", "@toolwright-adk/linear-bootstrap"],
+    "env": {
+      "LINEAR_API_KEY": "",
+      "LLM_API_KEY": "",
+      "LLM_BASE_URL": "",
+      "LLM_MODEL": ""
+    }
+  },
+  "skill": {
+    "source": "package",
+    "path": ".claude/skills/linear-bootstrap/SKILL.md"
+  }
+}

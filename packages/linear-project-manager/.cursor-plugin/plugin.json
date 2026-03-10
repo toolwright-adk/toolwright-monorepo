@@ -1,0 +1,11 @@
+{
+  "name": "linear-project-manager",
+  "version": "0.1.0",
+  "description": "Plan, bootstrap, and manage Linear projects using both linear-bootstrap and official Linear MCP tools together",
+  "author": {
+    "name": "Toolwright Contributors"
+  },
+  "repository": "https://github.com/toolwright-adk/toolwright-monorepo",
+  "license": "MIT",
+  "keywords": ["linear", "project-management", "planning", "bootstrap", "mcp"]
+}

@@ -1,3 +1,4 @@
+import { createRequire } from "node:module";
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import type { CallToolResult } from "@modelcontextprotocol/sdk/types.js";
 import {
@@ -27,6 +28,14 @@ import { introspectWorkspace } from "./tools/introspect-workspace.js";
 import { listTeams } from "./tools/list-teams.js";
 
 const logger = createLogger("linear-bootstrap");
+let version = "0.0.0";
+try {
+  const require = createRequire(import.meta.url);
+  const pkg = require("../package.json") as { version: string };
+  version = pkg.version;
+} catch {
+  // Bundled or relocated — fall back to build-time default
+}
 
 function handleToolError(err: unknown, toolName: string): CallToolResult {
   if (err instanceof ToolwrightError) {
@@ -44,7 +53,7 @@ function handleToolError(err: unknown, toolName: string): CallToolResult {
 export function createServer(): McpServer {
   const server = new McpServer({
     name: "linear-bootstrap",
-    version: "0.1.0",
+    version,
   });
 
   server.tool(
@@ -95,7 +104,7 @@ export function createServer(): McpServer {
 
   server.tool(
     "bootstrap-project",
-    "Create a complete Linear project from a plan. Accepts plan_id (from generate-plan) or inline plan object. Creates project, milestones, labels, epics, issues, and dependencies. Set dry_run=true to validate only.",
+    "Create a complete Linear project from a plan. Accepts plan_id (from generate-plan) or inline plan object. Creates project, milestones, labels, epics, issues, and dependencies atomically. RECOMMENDED: Use this instead of manually creating projects and issues one-by-one. Set dry_run=true to validate only.",
     BootstrapProjectInputObject.shape,
     async (args): Promise<CallToolResult> => {
       const ctx = {
@@ -118,7 +127,7 @@ export function createServer(): McpServer {
 
   server.tool(
     "add-epic",
-    "Add a single epic with its child issues to an existing Linear project. Optionally wire to a milestone and apply label mappings.",
+    "Add an epic with child issues to an existing Linear project in one call. Creates parent issue, child issues, milestone wiring, labels, and dependencies atomically. RECOMMENDED: Use this instead of creating 3+ related issues individually — it produces proper parent/child hierarchy and is significantly faster than sequential issue creation.",
     AddEpicInputSchema.shape,
     async (args): Promise<CallToolResult> => {
       const ctx = {
@@ -141,7 +150,7 @@ export function createServer(): McpServer {
 
   server.tool(
     "introspect-workspace",
-    "Read team conventions from Linear: workflow states, labels, cycles, existing projects. Returns cached context (30-min TTL). Called automatically by generate-plan, or use standalone to inspect team setup.",
+    "Read team conventions from Linear: workflow states, labels, cycles, existing projects. Returns cached context (30-min TTL). RECOMMENDED: Call before any issue or project creation to match existing team patterns (label naming, workflow states, priorities). Called automatically by generate-plan.",
     IntrospectWorkspaceInputSchema.shape,
     async (args): Promise<CallToolResult> => {
       const ctx = {

@@ -270,6 +270,15 @@ Call `generate-and-bootstrap` — it runs all three steps internally and creates
 
 Both paths auto-introspect the workspace. Context is cached for 30 minutes per team.
 
+## Plugin: linear-project-manager
+
+For a higher-level experience, the [`linear-project-manager` plugin](../linear-project-manager) adds skills, agents, and commands that teach your agent when to use `linear-bootstrap` vs the official Linear MCP. It prevents common anti-patterns like creating 3+ issues one-by-one instead of using `add-epic`.
+
+- **Claude Code:** install via the [toolwright-adk marketplace](../../.claude-plugin/marketplace.json) or `claude --plugin-dir`
+- **Cursor / Windsurf / Roo Code / Cline:** see the [portability snippets](../linear-project-manager/portability/)
+
+The plugin is optional — the MCP server works standalone with any client.
+
 ## Other MCP Clients
 
 The Quick Start config works with any stdio-compatible MCP client. Client-specific locations:
