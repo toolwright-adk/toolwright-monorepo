@@ -9,7 +9,7 @@ allowed-tools: mcp__linear-bootstrap__introspect-workspace, mcp__linear__get_pro
 license: MIT
 metadata:
   author: toolwright-adk
-  version: "0.1.0"
+  version: "0.1.4"
 compatibility: Requires both the linear-bootstrap MCP server and the official Linear MCP (first-party Claude integration).
 ---
 
