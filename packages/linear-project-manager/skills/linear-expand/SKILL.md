@@ -5,7 +5,7 @@ description: |
   wants to expand a project's scope, add an epic, add a batch of related issues to a project,
   or says something like "add these issues to the project" with 3 or more items.
 argument-hint: "[description of work to add]"
-allowed-tools: mcp__linear-bootstrap__introspect-workspace, mcp__linear-bootstrap__add-epic, mcp__linear__get_project, mcp__linear__list_issues, mcp__linear__list_milestones, mcp__linear__get_milestone
+allowed-tools: mcp__linear-bootstrap__introspect-workspace, mcp__linear-bootstrap__add-epic, mcp__linear__get_project, mcp__linear__list_projects, mcp__linear__list_issues, mcp__linear__list_milestones, mcp__linear__get_milestone
 license: MIT
 metadata:
   author: toolwright-adk

@@ -2,7 +2,7 @@
   "name": "toolwright-adk",
   "owner": {
     "name": "Toolwright Contributors",
-    "email": "https://github.com/toolwright-adk"
+    "url": "https://github.com/toolwright-adk"
   },
   "metadata": {
     "description": "Agent development toolkit — plugins for Linear project management, temporal awareness, and more",

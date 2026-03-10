@@ -28,8 +28,14 @@ import { introspectWorkspace } from "./tools/introspect-workspace.js";
 import { listTeams } from "./tools/list-teams.js";
 
 const logger = createLogger("linear-bootstrap");
-const require = createRequire(import.meta.url);
-const pkg = require("../package.json") as { version: string };
+let version = "0.0.0";
+try {
+  const require = createRequire(import.meta.url);
+  const pkg = require("../package.json") as { version: string };
+  version = pkg.version;
+} catch {
+  // Bundled or relocated — fall back to build-time default
+}
 
 function handleToolError(err: unknown, toolName: string): CallToolResult {
   if (err instanceof ToolwrightError) {
@@ -47,7 +53,7 @@ function handleToolError(err: unknown, toolName: string): CallToolResult {
 export function createServer(): McpServer {
   const server = new McpServer({
     name: "linear-bootstrap",
-    version: pkg.version,
+    version,
   });
 
   server.tool(

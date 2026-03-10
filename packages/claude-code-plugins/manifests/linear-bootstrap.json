@@ -3,8 +3,8 @@
   "description": "Bootstrap Linear projects from natural language descriptions",
   "package": "@toolwright-adk/linear-bootstrap",
   "mcp": {
-    "command": "linear-bootstrap",
-    "args": [],
+    "command": "npx",
+    "args": ["-y", "@toolwright-adk/linear-bootstrap"],
     "env": {
       "LINEAR_API_KEY": "",
       "LLM_API_KEY": "",

@@ -5,7 +5,7 @@ description: |
   about project progress, wants a status report, asks "how's the project going", wants to
   know what's blocked, or needs to post a status update to Linear.
 argument-hint: "[project name or ID]"
-allowed-tools: mcp__linear-bootstrap__introspect-workspace, mcp__linear__get_project, mcp__linear__list_issues, mcp__linear__get_milestone, mcp__linear__list_milestones, mcp__linear__get_status_updates, mcp__linear__save_status_update, mcp__linear__list_cycles
+allowed-tools: mcp__linear-bootstrap__introspect-workspace, mcp__linear__get_project, mcp__linear__list_projects, mcp__linear__list_issues, mcp__linear__get_milestone, mcp__linear__list_milestones, mcp__linear__get_status_updates, mcp__linear__save_status_update, mcp__linear__list_cycles
 license: MIT
 metadata:
   author: toolwright-adk
