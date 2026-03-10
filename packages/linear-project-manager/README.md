@@ -32,7 +32,7 @@ claude plugin marketplace add toolwright-adk/toolwright-monorepo
 
 2. Open `/plugin` in Claude Code, go to the **Marketplaces** tab, select **toolwright-adk**, and install **linear-project-manager**.
 
-3. Restart your Claude Code session.
+If you ran step 1 from within an active Claude Code session, you may need to restart before the marketplace appears in `/plugin`.
 
 ### Local testing
 
