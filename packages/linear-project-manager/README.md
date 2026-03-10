@@ -55,17 +55,25 @@ The plugin itself has no runtime dependencies — it's all markdown. But the ski
 
 Run `/linear-check` to verify both are available.
 
-## Cross-Platform Portability
+## Cross-Platform Support
 
-The tool selection rules work beyond Claude Code. See [`portability/`](portability/) for ready-to-use snippets:
+### Cursor
+
+This plugin includes a `.cursor-plugin/plugin.json` manifest. Cursor uses the same directory conventions (`skills/`, `agents/`, `commands/`) and the same SKILL.md frontmatter format. The plugin is structurally ready for the [Cursor Marketplace](https://cursor.com/marketplace).
+
+### Other Platforms
+
+See [`portability/`](portability/) for ready-to-use snippets:
 
 | Platform          | File                                                           |
 | ----------------- | -------------------------------------------------------------- |
 | Cursor / Windsurf | [`cursorrules-snippet.md`](portability/cursorrules-snippet.md) |
-| Codex / Continue  | [`AGENTS.md`](portability/AGENTS.md)                           |
 | Roo Code / Cline  | [`clinerules-snippet.md`](portability/clinerules-snippet.md)   |
+| Codex / Continue  | [`AGENTS.md`](portability/AGENTS.md)                           |
 
-The `linear-bootstrap` MCP tool descriptions also include `RECOMMENDED` usage guidance that works in any MCP-capable environment without additional configuration.
+The skills in `skills/` are also directly compatible with [Roo Code's skill system](https://docs.roocode.com/features/skills) — copy them to `.roo/skills/` or `.agents/skills/`.
+
+The `linear-bootstrap` MCP tool descriptions include `RECOMMENDED` usage guidance that works in any MCP-capable environment without additional configuration.
 
 ## License
 
