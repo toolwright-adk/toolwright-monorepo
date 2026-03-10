@@ -24,21 +24,15 @@ Encodes tool selection heuristics as skills, agents, and commands:
 
 ### Via marketplace
 
-Add the marketplace to your Claude Code settings:
+1. Add the marketplace:
 
-```
-/plugin marketplace add github:toolwright-adk/toolwright-monorepo
+```bash
+claude plugin marketplace add toolwright-adk/toolwright-monorepo
 ```
 
-Then enable the plugin in your project `.claude/settings.json`:
+2. Open `/plugin` in Claude Code, go to the **Marketplaces** tab, select **toolwright-adk**, and install **linear-project-manager**.
 
-```json
-{
-  "enabledPlugins": {
-    "linear-project-manager@toolwright-adk": true
-  }
-}
-```
+3. Restart your Claude Code session.
 
 ### Local testing
 
